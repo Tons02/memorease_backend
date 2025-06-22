@@ -3,14 +3,18 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Filters\UserFilter;
+use Essa\APIToolKit\Filters\Filterable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes, HasApiTokens, Filterable;
 
     /**
      * The attributes that are mass assignable.
@@ -18,9 +22,18 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'fname',
+        'mi',
+        'lname',
+        'suffix',
+        'gender',
+        'mobile_number',
+        'birthday',
+        'address',
+        'username',
         'email',
         'password',
+        'role_id',
     ];
 
     /**
@@ -45,4 +58,12 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    protected string $default_filters = UserFilter::class;
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'role_id')->withTrashed();
+    }
+
 }
