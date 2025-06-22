@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ChangePasswordRequest;
+use App\Http\Requests\RegistrationRequest;
+use App\Models\Role;
 use App\Models\User;
 use Essa\APIToolKit\Api\ApiResponse;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
@@ -46,6 +49,36 @@ class AuthController extends Controller
         $cookie = Cookie::forget('authcookie');
         auth('sanctum')->user()->currentAccessToken()->delete();
         return $this->responseSuccess('Logout successfully');
+    }
+
+    public function registration(RegistrationRequest $request)
+    {
+        $role = Role::where('name', 'customer')->first();
+
+        if (!$role) {
+            return $this->responseUnprocessable('Role is not setup please contact Support or Admin');
+        }
+
+        $create_user = User::create([
+            "profile_picture" => "default_profile.jpg",
+            "fname" => $request["fname"],
+            "mi" => $request["mi"],
+            "lname" => $request["lname"],
+            "suffix" => $request["suffix"],
+            "gender" => $request["gender"],
+            "mobile_number" => $request["mobile_number"],
+            "birthday" => $request["birthday"],
+            "address" => $request["address"],
+            "username" => $request["username"],
+            "email" => $request["email"],
+            "password" => $request["username"],
+            "role_id" => $role->id,
+        ]);
+
+        // Dispatch email verification
+        event(new Registered($create_user));
+
+        return $this->responseCreated('Registration successful. Please check your email to verify your account.', $create_user);
     }
 
     public function resetPassword(Request $request, $id)

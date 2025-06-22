@@ -36,6 +36,7 @@ class UserController extends Controller
     public function store(UserRequest $request)
     {
         $create_user = User::create([
+            "profile_picture" => "default_profile.jpg",
             "fname" => $request["fname"],
             "mi" => $request["mi"],
             "lname" => $request["lname"],

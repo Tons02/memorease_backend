@@ -1,25 +1,49 @@
 <?php
 
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\CemeteriesController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\UserController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::post('login', [AuthController::class, 'login']);
+Route::post('login', [AuthController::class, 'login'])->name('login');
+Route::post('registration', [AuthController::class, 'registration']);
 
-Route::middleware(['auth:sanctum'])->group(function () {
 
-    // Role Controller
-    Route::put('role-archived/{id}', [RoleController::class, 'archived']);
-    Route::resource("role", RoleController::class);
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+    return response()->json(['message' => 'Email verified successfully.']);
+})->middleware(['auth:sanctum', 'signed'])->name('verification.verify'); // Add 'auth:sanctum' middleware
 
-    // User Controller
-    Route::put('user-archived/{id}', [UserController::class, 'archived']);
-    Route::resource("user", UserController::class);
+// Resend verification email
+Route::post('email/verification-notification', function (Request $request) {
+    if ($request->user()->hasVerifiedEmail()) {
+        return response()->json(['message' => 'Email already verified.'], 400);
+    }
 
-    // auth controller
-    Route::patch('changepassword', [AuthController::class, 'changedPassword']);
-    Route::post('logout', [AuthController::class, 'logout']);
-    Route::patch('resetpassword/{id}', [AuthController::class, 'resetPassword']);
-});
+    $request->user()->sendEmailVerificationNotification();
+
+    return response()->json(['message' => 'Verification email sent.']);
+})->middleware(['auth:sanctum', 'throttle:6,1']);
+
+// Route::middleware(['auth:sanctum'])->group(function () {
+
+// Role Controller
+Route::put('role-archived/{id}', [RoleController::class, 'archived']);
+Route::resource("role", RoleController::class);
+
+// User Controller
+Route::put('user-archived/{id}', [UserController::class, 'archived']);
+Route::resource("user", UserController::class);
+
+// Cemeteries Controller
+Route::put('cemeteries-archived/{id}', [CemeteriesController::class, 'archived']);
+Route::resource("cemeteries", CemeteriesController::class);
+
+// auth controller
+Route::patch('changepassword', [AuthController::class, 'changedPassword']);
+Route::post('logout', [AuthController::class, 'logout']);
+Route::patch('resetpassword/{id}', [AuthController::class, 'resetPassword']);
+// });

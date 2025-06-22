@@ -12,11 +12,11 @@ return new class extends Migration {
     {
         Schema::create('cemeteries', function (Blueprint $table) {
             $table->id();
-            $table->string('fname');
+            $table->string('name');
             $table->string('location');
-            $table->string('description');
-            $table->string('profile_picture');
-            $table->string(column: 'background_picture');
+            $table->string('description')->nullable();
+            $table->string('profile_picture')->nullable();
+            $table->string(column: 'background_picture')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
