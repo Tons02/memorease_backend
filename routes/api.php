@@ -14,8 +14,9 @@ Route::post('registration', [AuthController::class, 'registration']);
 
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
+
     return response()->json(['message' => 'Email verified successfully.']);
-})->middleware(['auth:sanctum', 'signed'])->name('verification.verify'); // Add 'auth:sanctum' middleware
+})->middleware(['auth:sanctum', 'signed'])->name('verification.verify');
 
 // Resend verification email
 Route::post('email/verification-notification', function (Request $request) {

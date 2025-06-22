@@ -71,14 +71,24 @@ class AuthController extends Controller
             "address" => $request["address"],
             "username" => $request["username"],
             "email" => $request["email"],
-            "password" => $request["username"],
+            "password" => $request["password"],
             "role_id" => $role->id,
         ]);
 
         // Dispatch email verification
         event(new Registered($create_user));
 
-        return $this->responseCreated('Registration successful. Please check your email to verify your account.', $create_user);
+        $permissions = $create_user->role->access_permission ?? [];
+        $token = $create_user->createToken($create_user->role->name, $permissions)->plainTextToken;
+
+        $cookie = cookie('authcookie', $token);
+
+        return response()->json([
+            'message' => 'Registration successful. Please check your email to verify your account.',
+            'token' => $token,
+            'data' => $create_user
+        ], 200)->withCookie($cookie);
+
     }
 
     public function resetPassword(Request $request, $id)

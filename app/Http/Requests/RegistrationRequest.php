@@ -26,15 +26,9 @@ class RegistrationRequest extends FormRequest
                 "required",
                 "string",
             ],
-            "mi" => [
-                "string",
-            ],
             "lname" => [
                 "required",
                 "string",
-            ],
-            "suffix" => [
-                "in:Jr,Sr"
             ],
             "gender" => [
                 "in:male,female"
@@ -56,7 +50,13 @@ class RegistrationRequest extends FormRequest
             ],
             "email" => [
                 "email",
-                "required"
+                "required",
+                "unique:users,email," . $this->route()->user,
+            ],
+            'password' => [
+                'required',
+                'min:4',
+                'confirmed'
             ],
         ];
     }
