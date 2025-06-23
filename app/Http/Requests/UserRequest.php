@@ -27,6 +27,7 @@ class UserRequest extends FormRequest
                 "string",
             ],
             "mi" => [
+                "nullable",
                 "string",
             ],
             "lname" => [
@@ -34,6 +35,7 @@ class UserRequest extends FormRequest
                 "string",
             ],
             "suffix" => [
+                "nullable",
                 "in:Jr,Sr"
             ],
             "gender" => [
@@ -57,6 +59,9 @@ class UserRequest extends FormRequest
             "email" => [
                 "email",
                 "required"
+            ],
+            "user_type" => [
+                "in:male,female"
             ],
             "role_id" => ["required", "exists:roles,id"],
         ];

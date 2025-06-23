@@ -26,8 +26,8 @@ class RoleRequest extends FormRequest
                 "required",
                 "string",
                 $this->route()->role
-                ? "unique:roles,name," . $this->route()->role
-                : "unique:roles,name",
+                    ? "unique:roles,name," . $this->route()->role
+                    : "unique:roles,name",
             ],
             "access_permission" => [
                 "required",
@@ -38,6 +38,10 @@ class RoleRequest extends FormRequest
                     $allowedValues = [
                         "role",
                         "user",
+                        "dashboard",
+                        "user-management",
+                        "masterlist",
+                        "cemeteries",
                     ];
 
                     foreach ($value as $permission) {

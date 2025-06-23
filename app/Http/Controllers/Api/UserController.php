@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Notifications\SendDefaultCredentialsNotification;
 use Essa\APIToolKit\Api\ApiResponse;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -17,7 +20,7 @@ class UserController extends Controller
         $status = $request->query('status');
         $pagination = $request->query('pagination');
 
-        $users = User::query()
+        $users = User::with('role')
             ->when($status === 'inactive', function ($query) {
                 $query->onlyTrashed();
             })
@@ -35,6 +38,7 @@ class UserController extends Controller
 
     public function store(UserRequest $request)
     {
+        $password = Str::random(6);
         $create_user = User::create([
             "profile_picture" => "default_profile.jpg",
             "fname" => $request["fname"],
@@ -47,9 +51,11 @@ class UserController extends Controller
             "address" => $request["address"],
             "username" => $request["username"],
             "email" => $request["email"],
-            "password" => $request["username"],
+            "password" => $password,
             "role_id" => $request["role_id"],
         ]);
+
+        $create_user->notify(new SendDefaultCredentialsNotification($password));
 
         return $this->responseCreated('User Successfully Created', $create_user);
     }
