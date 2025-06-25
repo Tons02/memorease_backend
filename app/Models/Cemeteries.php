@@ -12,11 +12,10 @@ class Cemeteries extends Model
 {
     use HasFactory, SoftDeletes, Filterable;
     protected $fillable = [
-        'name',
-        'location',
-        'description',
         'profile_picture',
-        'background_picture',
+        'name',
+        'description',
+        'location',
     ];
 
     protected $hidden = [

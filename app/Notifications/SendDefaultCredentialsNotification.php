@@ -46,7 +46,7 @@ class SendDefaultCredentialsNotification extends Notification
             ->greeting('Hello ' . $notifiable->fname)
             ->line('Your account has been created.')
             ->line('Username: ' . $notifiable->username)
-            ->line('Password: ' . $this->password) // ✅ Use property, not argument
+            ->line('Password: ' . $this->password)
             ->action('Login Here', $frontendUrl . '/login')
             ->line('Please change your password after logging in.');
     }

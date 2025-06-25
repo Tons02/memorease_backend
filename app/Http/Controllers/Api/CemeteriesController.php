@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CemeteriesRequest;
+use App\Http\Resources\CemeteryResource;
 use App\Models\Cemeteries;
 use Essa\APIToolKit\Api\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class CemeteriesController extends Controller
 {
@@ -22,46 +24,58 @@ class CemeteriesController extends Controller
             ->useFilters()
             ->dynamicPaginate();
 
-        return $this->responseSuccess('Cemeteries display successfully', $Cemeteries);
+        return $this->responseSuccess('Cemeteries display successfully', CemeteryResource::collection($Cemeteries));
     }
 
     public function store(CemeteriesRequest $request)
     {
+        if (Cemeteries::exists()) {
+            return $this->responseUnprocessable('', 'Unable to create: a cemetery already exists.');
+        }
+
+        $path = $request->file('profile_picture')?->store('cemeteries', 'public');
+
+        // Create new cemetery
         $create_cemeteries = Cemeteries::create([
-            "name" => $request->name,
-            "location" => $request->location,
-            "description" => $request->description,
-            "profile_picture" => $request->profile_picture,
-            "background_picture" => $request->background_picture,
+            'profile_picture' => $path,
+            'name' => $request->name,
+            'description' => $request->description,
+            'location' => $request->location,
         ]);
 
         return $this->responseCreated('Cemetery Successfully Created', $create_cemeteries);
     }
 
+
     public function update(CemeteriesRequest $request, $id)
     {
-        $cemeteries = Cemeteries::find($id);
+        $cemetery = Cemeteries::find($id);
 
-        if (!$cemeteries) {
+        if (!$cemetery) {
             return $this->responseUnprocessable('', 'Invalid ID provided for updating. Please check the ID and try again.');
         }
 
-        $cemeteries->name = $request['name'];
-        $cemeteries->location = $request['location'];
-        $cemeteries->description = $request['description'];
-        $cemeteries->profile_picture = $request['profile_picture'];
-        $cemeteries->background_picture = $request['background_picture'];
+        if ($request->hasFile('profile_picture')) {
+            if ($cemetery->profile_picture && Storage::disk('public')->exists($cemetery->profile_picture)) {
+                Storage::disk('public')->delete($cemetery->profile_picture);
+            }
 
-        if (!$cemeteries->isDirty()) {
-            return $this->responseSuccess('No Changes', $cemeteries);
+            $path = $request->file('profile_picture')->store('cemeteries', 'public');
+            $cemetery->profile_picture = $path;
         }
 
-        // Save updated cemeteries
-        $cemeteries->save();
+        $cemetery->name = $request->name;
+        $cemetery->description = $request->description;
+        $cemetery->location = $request->location;
 
-        return $this->responseSuccess('Cemetery successfully updated', $cemeteries);
+        if (!$cemetery->isDirty()) {
+            return $this->responseSuccess('No changes detected.', $cemetery);
+        }
+
+        $cemetery->save();
+
+        return $this->responseSuccess('Cemetery successfully updated', $cemetery);
     }
-
 
     public function archived(Request $request, $id)
     {

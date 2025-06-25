@@ -13,16 +13,13 @@ return new class extends Migration {
         Schema::create('lots', function (Blueprint $table) {
             $table->id();
             $table->string('lot_number');
-            $table->integer('row');
-            $table->integer('column');
-
+            $table->json('bounds');
             $table->enum('status', ['available', 'reserved', 'occupied'])->default('available');
             $table->dateTime('reserved_until')->nullable();
-
-            $table->decimal('latitude', 10, 8)->nullable();
-            $table->decimal('longitude', 11, 8)->nullable();
-
-            $table->foreignId('section_id')->constrained()->onDelete('cascade');
+            $table->decimal('price', 7, 2);
+            $table->decimal('promo_price', 7, 2);
+            $table->date('promo_until')->nullable();
+            $table->boolean('is_featured')->default(false);
 
             $table->timestamps();
             $table->softDeletes();
