@@ -41,6 +41,7 @@ class CemeteriesController extends Controller
             'name' => $request->name,
             'description' => $request->description,
             'location' => $request->location,
+            'coordinates' => $request->coordinates,
         ]);
 
         return $this->responseCreated('Cemetery Successfully Created', $create_cemeteries);
@@ -67,6 +68,7 @@ class CemeteriesController extends Controller
         $cemetery->name = $request->name;
         $cemetery->description = $request->description;
         $cemetery->location = $request->location;
+        $cemetery->coordinates = $request->coordinates;
 
         if (!$cemetery->isDirty()) {
             return $this->responseSuccess('No changes detected.', $cemetery);

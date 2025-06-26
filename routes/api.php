@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\CemeteriesController;
+use App\Http\Controllers\Api\LotController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -42,6 +43,10 @@ Route::resource("user", UserController::class);
 // Cemeteries Controller
 Route::put('cemeteries-archived/{id}', [CemeteriesController::class, 'archived']);
 Route::resource("cemeteries", CemeteriesController::class);
+
+// Lot Controller
+Route::put('lot-archived/{id}', [LotController::class, 'archived']);
+Route::resource("lot", LotController::class);
 
 // auth controller
 Route::patch('changepassword', [AuthController::class, 'changedPassword']);

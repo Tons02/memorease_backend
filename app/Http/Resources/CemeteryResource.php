@@ -22,6 +22,8 @@ class CemeteryResource extends JsonResource
             'profile_picture' => $this->profile_picture
                 ? asset('storage/' . $this->profile_picture)
                 : null,
+
+            'coordinates' => $this->coordinates,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

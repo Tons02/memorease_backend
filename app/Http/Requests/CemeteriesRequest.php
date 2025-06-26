@@ -26,6 +26,7 @@ class CemeteriesRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'location' => ['required', 'string', 'max:255'],
+            'coordinates' => ['required', 'json'],
         ];
     }
 }
