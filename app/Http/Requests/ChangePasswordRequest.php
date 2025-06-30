@@ -25,7 +25,7 @@ class ChangePasswordRequest extends FormRequest
             'old_password' => ['required', 'current_password'],
             'new_password' => [
                 'required',
-                'min:4',
+                // 'min:4',
                 'different:old_password',
                 'not_in:' . auth()->user()->username,
                 'confirmed'

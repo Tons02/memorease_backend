@@ -30,26 +30,26 @@ Route::post('email/verification-notification', function (Request $request) {
     return response()->json(['message' => 'Verification email sent.']);
 })->middleware(['auth:sanctum', 'throttle:6,1']);
 
-// Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
 
-// Role Controller
-Route::put('role-archived/{id}', [RoleController::class, 'archived']);
-Route::resource("role", RoleController::class);
+    // Role Controller
+    Route::put('role-archived/{id}', [RoleController::class, 'archived']);
+    Route::resource("role", RoleController::class);
 
-// User Controller
-Route::put('user-archived/{id}', [UserController::class, 'archived']);
-Route::resource("user", UserController::class);
+    // User Controller
+    Route::put('user-archived/{id}', [UserController::class, 'archived']);
+    Route::resource("user", UserController::class);
 
-// Cemeteries Controller
-Route::put('cemeteries-archived/{id}', [CemeteriesController::class, 'archived']);
-Route::resource("cemeteries", CemeteriesController::class);
+    // Cemeteries Controller
+    Route::put('cemeteries-archived/{id}', [CemeteriesController::class, 'archived']);
+    Route::resource("cemeteries", CemeteriesController::class);
 
-// Lot Controller
-Route::put('lot-archived/{id}', [LotController::class, 'archived']);
-Route::resource("lot", LotController::class);
+    // Lot Controller
+    Route::put('lot-archived/{id}', [LotController::class, 'archived']);
+    Route::resource("lot", LotController::class);
 
-// auth controller
-Route::patch('changepassword', [AuthController::class, 'changedPassword']);
-Route::post('logout', [AuthController::class, 'logout']);
-Route::patch('resetpassword/{id}', [AuthController::class, 'resetPassword']);
-// });
+    // auth controller
+    Route::patch('changepassword', [AuthController::class, 'changedPassword']);
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::patch('resetpassword/{id}', [AuthController::class, 'resetPassword']);
+});

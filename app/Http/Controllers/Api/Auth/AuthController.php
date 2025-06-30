@@ -88,7 +88,6 @@ class AuthController extends Controller
             'token' => $token,
             'data' => $create_user
         ], 200)->withCookie($cookie);
-
     }
 
     public function resetPassword(Request $request, $id)
