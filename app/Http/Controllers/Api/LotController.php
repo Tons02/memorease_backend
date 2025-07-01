@@ -87,7 +87,7 @@ class LotController extends Controller
 
             $lot->delete();
 
-            return $this->responseSuccess('lot successfully archive', $lot);
+            return $this->responseSuccess('lot successfully deleted', $lot);
         }
     }
 }

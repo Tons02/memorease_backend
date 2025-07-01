@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class LotRequest extends FormRequest
 {
@@ -25,9 +26,7 @@ class LotRequest extends FormRequest
             "lot_number" => [
                 "required",
                 "string",
-                $this->route()->lot
-                    ? "unique:lots,lot_number," . $this->route()->lot
-                    : "unique:lots,lot_number",
+                Rule::unique('lots', 'lot_number')->ignore($this->route('id')),
             ],
             "coordinates" => [
                 "required",

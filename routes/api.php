@@ -30,6 +30,10 @@ Route::post('email/verification-notification', function (Request $request) {
     return response()->json(['message' => 'Verification email sent.']);
 })->middleware(['auth:sanctum', 'throttle:6,1']);
 
+
+Route::get("cemeteries", [CemeteriesController::class, 'index']);
+Route::get("lot", [LotController::class, 'index']);
+
 Route::middleware(['auth:sanctum'])->group(function () {
 
     // Role Controller
@@ -42,11 +46,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Cemeteries Controller
     Route::put('cemeteries-archived/{id}', [CemeteriesController::class, 'archived']);
-    Route::resource("cemeteries", CemeteriesController::class);
+    Route::post("cemeteries", [CemeteriesController::class, 'store']);
+    Route::patch("cemeteries/{id}", [CemeteriesController::class, 'update']);
 
     // Lot Controller
     Route::put('lot-archived/{id}', [LotController::class, 'archived']);
-    Route::resource("lot", LotController::class);
+    Route::post("lot", [LotController::class, 'store']);
+    Route::patch("lot/{id}", [LotController::class, 'update']);
+
 
     // auth controller
     Route::patch('changepassword', [AuthController::class, 'changedPassword']);

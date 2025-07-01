@@ -27,7 +27,6 @@ class ChangePasswordRequest extends FormRequest
                 'required',
                 // 'min:4',
                 'different:old_password',
-                'not_in:' . auth()->user()->username,
                 'confirmed'
             ],
         ];
