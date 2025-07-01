@@ -65,13 +65,14 @@ class CemeteriesController extends Controller
             $cemetery->profile_picture = $path;
         }
 
+        // Assign values
         $cemetery->name = $request->name;
         $cemetery->description = $request->description;
         $cemetery->location = $request->location;
-        $cemetery->coordinates = $request->coordinates;
 
-        if (!$cemetery->isDirty()) {
-            return $this->responseSuccess('No changes detected.', $cemetery);
+        // Only update coordinates if provided in the request
+        if ($request->filled('coordinates')) {
+            $cemetery->coordinates = $request->coordinates;
         }
 
         $cemetery->save();

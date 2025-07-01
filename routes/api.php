@@ -54,7 +54,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post("lot", [LotController::class, 'store']);
     Route::patch("lot/{id}", [LotController::class, 'update']);
 
-
     // auth controller
     Route::patch('changepassword', [AuthController::class, 'changedPassword']);
     Route::post('logout', [AuthController::class, 'logout']);

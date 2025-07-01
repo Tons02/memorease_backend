@@ -22,11 +22,10 @@ class CemeteriesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'profile_picture' => ['sometimes', 'required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'location' => ['required', 'string', 'max:255'],
-            'coordinates' => ['required', 'json'],
+            'coordinates' => ['sometimes', 'required', 'json'],
         ];
     }
 }
