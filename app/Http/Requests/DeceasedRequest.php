@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class LotRequest extends FormRequest
+class DeceasedRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,34 +23,43 @@ class LotRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "lot_number" => [
-                "required",
-                "string",
-                Rule::unique('lots', 'lot_number')->ignore($this->route('id')),
-            ],
-            "coordinates" => [
-                "required",
-                "array",
-            ],
-            "status" => [
-                "in:available,pending,reserved,sold"
-            ],
-            "reserved_until" => [
-                "nullable",
-            ],
-            "price" => [
+            "lot_image" => [
                 "required",
             ],
-            "promo_price" => [
-                "nullable",
+            'lot_id' => [
+                'required',
+                Rule::exists('lots', 'id')->where(function ($query) {
+                    $query->where('status', 'sold');
+                }),
             ],
-            "promo_until" => [
-                "nullable",
-            ],
-            "is_featured" => [
-                "nullable",
+            "fname" => [
                 "required",
             ],
+            "lname" => [
+                "required",
+            ],
+            "gender" => [
+                "required",
+            ],
+            "birthday" => [
+                "required",
+            ],
+            "death_date" => [
+                "required",
+            ],
+            "burial_date" => [
+                "required",
+            ],
+            "death_certificate" => [
+                "required",
+            ],
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            "lot_id.exists" => "The selected Lot ID is invalid or not sold yet.",
         ];
     }
 }

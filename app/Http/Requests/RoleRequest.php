@@ -42,6 +42,7 @@ class RoleRequest extends FormRequest
                         "user-management",
                         "masterlist",
                         "cemeteries",
+                        "deceased",
                     ];
 
                     foreach ($value as $permission) {

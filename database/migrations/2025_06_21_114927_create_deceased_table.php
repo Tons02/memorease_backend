@@ -12,16 +12,17 @@ return new class extends Migration {
     {
         Schema::create('deceased', function (Blueprint $table) {
             $table->id();
+            $table->string('lot_image');
             $table->foreignId('lot_id')->constrained()->onDelete('cascade');
             $table->string('fname');
-            $table->string('mi');
+            $table->string('mname')->nullable();
             $table->string('lname');
-            $table->string('suffix');
-            $table->string(column: 'gender');
-            $table->string(column: 'birthday');
-            $table->string(column: 'death_date');
-            $table->string(column: 'burial_date');
-            $table->string(column: 'death_certificate');
+            $table->string('suffix')->nullable();
+            $table->string('gender');
+            $table->string('birthday');
+            $table->string('death_date');
+            $table->string('burial_date');
+            $table->string('death_certificate');
             $table->timestamps();
             $table->softDeletes();
         });

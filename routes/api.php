@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\CemeteriesController;
+use App\Http\Controllers\Api\DeceasedController;
 use App\Http\Controllers\Api\LotController;
+use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -33,6 +35,8 @@ Route::post('email/verification-notification', function (Request $request) {
 
 Route::get("cemeteries", [CemeteriesController::class, 'index']);
 Route::get("lot", [LotController::class, 'index']);
+Route::get("reservation", [ReservationController::class, 'index']);
+Route::get("deceased", [DeceasedController::class, 'index']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
 
@@ -53,6 +57,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('lot-archived/{id}', [LotController::class, 'archived']);
     Route::post("lot", [LotController::class, 'store']);
     Route::patch("lot/{id}", [LotController::class, 'update']);
+
+    // Reservation Controller
+    Route::put('reservation-archived/{id}', [ReservationController::class, 'archived']);
+    Route::post("reservation", [ReservationController::class, 'store']);
+    Route::patch("reservation/{id}", [ReservationController::class, 'update']);
+
+    // Deceased Controller
+    Route::put('deceased-archived/{id}', [DeceasedController::class, 'archived']);
+    Route::post("deceased", [DeceasedController::class, 'store']);
+    Route::patch("deceased/{id}", [DeceasedController::class, 'update']);
 
     // auth controller
     Route::patch('changepassword', [AuthController::class, 'changedPassword']);
