@@ -25,7 +25,6 @@ class Deceased extends Model
         'birthday',
         'burial_date',
         'death_date',
-        'burial_date',
         'death_certificate',
     ];
 

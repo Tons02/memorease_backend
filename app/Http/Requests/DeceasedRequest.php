@@ -47,9 +47,6 @@ class DeceasedRequest extends FormRequest
             "death_date" => [
                 "required",
             ],
-            "burial_date" => [
-                "required",
-            ],
             "death_certificate" => [
                 "required",
             ],

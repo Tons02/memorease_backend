@@ -34,4 +34,6 @@ class Lot extends Model
         'coordinates' => 'json',
         'is_featured' => 'boolean'
     ];
+
+    
 }

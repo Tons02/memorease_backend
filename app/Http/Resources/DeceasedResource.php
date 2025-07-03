@@ -36,7 +36,7 @@ class DeceasedResource extends JsonResource
             'suffix' => $this->suffix,
             'gender' => $this->gender,
             'birthday' => $this->birthday,
-            'burial_date' => $this->burial_date,
+            'death_date' => $this->death_date,
             'death_certificate' => $this->death_certificate
                 ? asset('storage/' . $this->death_certificate)
                 : null,

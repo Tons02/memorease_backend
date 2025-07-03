@@ -21,7 +21,6 @@ return new class extends Migration {
             $table->string('gender');
             $table->string('birthday');
             $table->string('death_date');
-            $table->string('burial_date');
             $table->string('death_certificate');
             $table->timestamps();
             $table->softDeletes();

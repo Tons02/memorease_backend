@@ -6,7 +6,14 @@ use Essa\APIToolKit\Filters\QueryFilters;
 
 class LotFilter extends QueryFilters
 {
-    protected array $allowedFilters = [];
+    protected array $columnSearch = [
+        'lot_number'
+    ];
 
-    protected array $columnSearch = [];
+    public function lot_status($lot_status)
+    {
+        $this->builder->where('status', $lot_status);
+
+        return $this;
+    }
 }

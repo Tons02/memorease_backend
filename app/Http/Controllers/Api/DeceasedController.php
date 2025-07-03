@@ -39,7 +39,7 @@ class DeceasedController extends Controller
     public function store(DeceasedRequest $request)
     {
 
-        return $request->file('lot_image');
+        $request->file('lot_image');
         $lot_image = $request->file('lot_image')?->store('lot_image', 'public');
         $death_certificate = $request->file('death_certificate')?->store('death_certificate', 'public');
 
@@ -54,20 +54,20 @@ class DeceasedController extends Controller
             'gender' => $request->gender,
             'birthday' => $request->birthday,
             'death_date' => $request->death_date,
-            'burial_date' => $request->burial_date,
             'death_certificate' => $death_certificate,
         ]);
 
         return $this->responseCreated('Deceased Successfully Created', $create_deceased);
     }
 
-    public function update(Request $request, $id)
+    public function update(DeceasedRequest $request, $id)
     {
         $update_deceased = Deceased::find($id);
 
         if (!$update_deceased) {
             return $this->responseUnprocessable('', 'Invalid ID provided for updating. Please check the ID and try again.');
         }
+
 
         // Handle lot_image replacement
         if ($request->hasFile('lot_image')) {
@@ -94,7 +94,6 @@ class DeceasedController extends Controller
         $update_deceased->gender = $request->gender;
         $update_deceased->birthday = $request->birthday;
         $update_deceased->death_date = $request->death_date;
-        $update_deceased->burial_date = $request->burial_date;
 
         $update_deceased->save();
 
