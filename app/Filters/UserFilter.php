@@ -8,5 +8,9 @@ class UserFilter extends QueryFilters
 {
     protected array $allowedFilters = [];
 
-    protected array $columnSearch = [];
+    protected array $columnSearch = [
+        'fname',
+        'mi',
+        'lname'
+    ];
 }

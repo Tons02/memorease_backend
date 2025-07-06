@@ -58,12 +58,12 @@ class UserRequest extends FormRequest
             ],
             "email" => [
                 "email",
-                "required"
+                "required",
+                "unique:users,email," . $this->route()->user,
             ],
-            "user_type" => [
-                "in:male,female"
+            "role_type" => [
+                "in:admin,customer"
             ],
-            "role_id" => ["required", "exists:roles,id"],
         ];
     }
 }

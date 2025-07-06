@@ -23,9 +23,6 @@ class DeceasedRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "lot_image" => [
-                "required",
-            ],
             'lot_id' => [
                 'required',
                 Rule::exists('lots', 'id')->where(function ($query) {
@@ -45,9 +42,6 @@ class DeceasedRequest extends FormRequest
                 "required",
             ],
             "death_date" => [
-                "required",
-            ],
-            "death_certificate" => [
                 "required",
             ],
         ];

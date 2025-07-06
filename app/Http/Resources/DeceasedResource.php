@@ -23,6 +23,7 @@ class DeceasedResource extends JsonResource
             'lot' => [
                 'id' => $this->lot->id,
                 'lot_number' => $this->lot->lot_number,
+                'coordinates' => $this->lot->coordinates,
             ],
             'full_name' => trim(collect([
                 $this->fname,

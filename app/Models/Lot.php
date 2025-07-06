@@ -36,4 +36,5 @@ class Lot extends Model
     ];
 
     
+    
 }

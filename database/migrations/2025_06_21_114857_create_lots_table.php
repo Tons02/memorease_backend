@@ -14,10 +14,11 @@ return new class extends Migration {
             $table->id();
             $table->string('lot_number');
             $table->json('coordinates');
-            $table->enum('status', ['available', 'reserved', 'occupied'])->default('available');
+            $table->enum('status', ['available', 'reserved', 'occupied', 'sold'])->default('available');
             $table->dateTime('reserved_until')->nullable();
-            $table->decimal('price', 7, 2);
-            $table->decimal('promo_price', 7, 2)->nullable();
+            $table->decimal('price', 15, 2);
+            $table->decimal('downpayment_price', 15, 2)->nullable();
+            $table->decimal('promo_price', 15, 2)->nullable();
             $table->date('promo_until')->nullable();
             $table->boolean('is_featured')->default(false);
 

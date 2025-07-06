@@ -38,8 +38,16 @@ class LotRequest extends FormRequest
             "reserved_until" => [
                 "nullable",
             ],
-            "price" => [
-                "required",
+            'price' => [
+                'required',
+                'numeric',
+                'regex:/^\d{1,10}(\.\d{1,2})?$/',
+            ],
+            'downpayment_price' => [
+                'nullable',
+                'numeric',
+                'regex:/^\d{1,10}(\.\d{1,2})?$/',
+                'lte:price',
             ],
             "promo_price" => [
                 "nullable",

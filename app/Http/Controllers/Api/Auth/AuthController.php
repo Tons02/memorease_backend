@@ -23,17 +23,15 @@ class AuthController extends Controller
         $username = $request->username;
         $password = $request->password;
 
-        $login = User::with([
-            'role',
-        ])->where('username', $username)->first();
+        $login = User::where('username', $username)->first();
 
 
         if (!$login || !hash::check($password, $login->password)) {
             return $this->responseBadRequest('', 'Invalid Credentials');
         }
 
-        $permissions = $login->role->access_permission ?? [];
-        $token = $login->createToken($login->role->name, $permissions)->plainTextToken;
+        $permissions = [$login->role_type];
+        $token = $login->createToken($login->role_type, $permissions)->plainTextToken;
 
         $cookie = cookie('authcookie', $token);
 
@@ -53,11 +51,6 @@ class AuthController extends Controller
 
     public function registration(RegistrationRequest $request)
     {
-        $role = Role::where('name', 'customer')->first();
-
-        if (!$role) {
-            return $this->responseUnprocessable('Role is not setup please contact Support or Admin');
-        }
 
         $create_user = User::create([
             "profile_picture" => "default_profile.jpg",
@@ -72,14 +65,15 @@ class AuthController extends Controller
             "username" => $request["username"],
             "email" => $request["email"],
             "password" => $request["password"],
-            "role_id" => $role->id,
+            "role_type" => "customer",
         ]);
 
         // Dispatch email verification
         event(new Registered($create_user));
 
-        $permissions = $create_user->role->access_permission ?? [];
-        $token = $create_user->createToken($create_user->role->name, $permissions)->plainTextToken;
+        $permissions = [$create_user->role_type];
+        $token = $create_user->createToken($create_user->role_type, $permissions)->plainTextToken;
+
 
         $cookie = cookie('authcookie', $token);
 

@@ -36,7 +36,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'username',
         'email',
         'password',
-        'role_id',
+        'role_type',
     ];
 
     /**
@@ -69,9 +69,5 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected string $default_filters = UserFilter::class;
 
-    public function role()
-    {
-        return $this->belongsTo(Role::class, 'role_id')->withTrashed();
-    }
 
 }

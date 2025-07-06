@@ -39,11 +39,6 @@ Route::get("reservation", [ReservationController::class, 'index']);
 Route::get("deceased", [DeceasedController::class, 'index']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
-
-    // Role Controller
-    Route::put('role-archived/{id}', [RoleController::class, 'archived']);
-    Route::resource("role", RoleController::class);
-
     // User Controller
     Route::put('user-archived/{id}', [UserController::class, 'archived']);
     Route::resource("user", UserController::class);
@@ -61,7 +56,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Reservation Controller
     Route::put('reservation-archived/{id}', [ReservationController::class, 'archived']);
     Route::post("reservation", [ReservationController::class, 'store']);
-    Route::patch("reservation/{id}", [ReservationController::class, 'update']);
+    Route::match(['POST', 'PATCH'], 'deceased/{id}', [DeceasedController::class, 'update']);
 
     // Deceased Controller
     Route::put('deceased-archived/{id}', [DeceasedController::class, 'archived']);

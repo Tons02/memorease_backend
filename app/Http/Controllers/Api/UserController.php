@@ -18,21 +18,14 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $status = $request->query('status');
-        $pagination = $request->query('pagination');
 
-        $users = User::with('role')
-            ->when($status === 'inactive', function ($query) {
-                $query->onlyTrashed();
-            })
+        $users = User::when($status === 'inactive', function ($query) {
+            $query->onlyTrashed();
+        })
             ->orderBy('created_at', 'desc')
             ->useFilters()
             ->dynamicPaginate();
 
-        if (!$pagination) {
-            UserResource::collection($users);
-        } else {
-            $users = UserResource::collection($users);
-        }
         return $this->responseSuccess('User display successfully', $users);
     }
 
@@ -52,7 +45,7 @@ class UserController extends Controller
             "username" => $request["username"],
             "email" => $request["email"],
             "password" => $password,
-            "role_id" => $request["role_id"],
+            "role_type" => $request["role_type"],
         ]);
 
         $create_user->notify(new SendDefaultCredentialsNotification($password));
@@ -77,7 +70,7 @@ class UserController extends Controller
         $userID->birthday = $request["birthday"];
         $userID->address = $request['address'];
         $userID->email = $request['email'];
-        $userID->role_id = $request['role_id'];
+        $userID->role_type = $request['role_type'];
 
         if (!$userID->isDirty()) {
             return $this->responseSuccess('No Changes', $userID);
@@ -90,6 +83,9 @@ class UserController extends Controller
 
     public function archived(Request $request, $id)
     {
+        if ($id == auth('sanctum')->user()->id) {
+            return $this->responseUnprocessable('', 'Unable to archive. You cannot archive your own account.');
+        }
 
         $user = User::withTrashed()->find($id);
 
