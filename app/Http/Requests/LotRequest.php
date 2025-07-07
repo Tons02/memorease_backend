@@ -23,6 +23,9 @@ class LotRequest extends FormRequest
     public function rules(): array
     {
         return [
+            "description" => [
+                "required",
+            ],
             "lot_number" => [
                 "required",
                 "string",
@@ -30,7 +33,6 @@ class LotRequest extends FormRequest
             ],
             "coordinates" => [
                 "required",
-                "array",
             ],
             "status" => [
                 "in:available,pending,reserved,sold"

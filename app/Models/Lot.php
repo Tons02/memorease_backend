@@ -14,7 +14,9 @@ class Lot extends Model
 
     protected $fillable = [
         'id',
+        'lot_image',
         'lot_number',
+        'description',
         'coordinates',
         'status',
         'reserved_until',
@@ -34,7 +36,4 @@ class Lot extends Model
         'coordinates' => 'json',
         'is_featured' => 'boolean'
     ];
-
-    
-    
 }

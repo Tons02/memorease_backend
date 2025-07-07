@@ -12,7 +12,9 @@ class LotFilter extends QueryFilters
 
     public function lot_status($lot_status)
     {
-        $this->builder->where('status', $lot_status);
+        if (!is_null($lot_status)) {
+            $this->builder->where('status', $lot_status);
+        }
 
         return $this;
     }

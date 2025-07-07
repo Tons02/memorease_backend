@@ -12,7 +12,9 @@ return new class extends Migration {
     {
         Schema::create('lots', function (Blueprint $table) {
             $table->id();
+            $table->string('lot_image');
             $table->string('lot_number');
+            $table->string('description');
             $table->json('coordinates');
             $table->enum('status', ['available', 'reserved', 'occupied', 'sold'])->default('available');
             $table->dateTime('reserved_until')->nullable();
