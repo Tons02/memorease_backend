@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class ReservationResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'lot' => $this->lot,
+            'customer' => $this->customer,
+            'appproved' => $this->appproved,
+
+            'status' => $this->status,
+            'total_downpayment_price' => $this->total_downpayment_price,
+            'remarks' => $this->remarks,
+            'reserved_at' => $this->reserved_at,
+            'expires_at' => $this->expires_at,
+            'proof_of_payment' => $this->proof_of_payment
+                ? asset('storage/' . $this->proof_of_payment)
+                : null,
+            'paid_at' => $this->paid_at,
+            'approved_date' => $this->approved_date,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ];
+    }
+}

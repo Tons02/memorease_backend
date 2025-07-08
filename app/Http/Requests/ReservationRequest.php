@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ReservationRequest extends FormRequest
 {
@@ -11,7 +12,7 @@ class ReservationRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +23,14 @@ class ReservationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'lot_id' => ['required', Rule::exists('lots', 'id')->where('status', 'available')],
+            "user_id" => ["required", "exists:users,id"],
+            'total_downpayment_price' => [
+                'required',
+                'numeric',
+                'regex:/^\d{1,15}(\.\d{1,2})?$/',
+            ],
+            "proof_of_payment" => ["required"],
         ];
     }
 }

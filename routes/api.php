@@ -51,7 +51,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Lot Controller
     Route::put('lot-archived/{id}', [LotController::class, 'archived']);
     Route::post("lot", [LotController::class, 'store']);
-    Route::match(['POST', 'PATCH'], "lot/{id}", [LotController::class, 'update']);
+    Route::patch("lot/{id}", [LotController::class, 'update']);
+    // Route::match(['POST', 'PATCH'], "lot/{id}", [LotController::class, 'update']);
 
     // Reservation Controller
     Route::put('reservation-archived/{id}', [ReservationController::class, 'archived']);

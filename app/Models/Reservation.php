@@ -16,10 +16,14 @@ class Reservation extends Model
         'status',
         'lot_id',
         'user_id',
+        'total_downpayment_price',
+        'proof_of_payment',
+        'remarks',
         'reserved_at',
         'expires_at',
-        'reserved_at',
-        'expires_at',
+        'paid_at',
+        'approved_date',
+        'approved_id',
     ];
 
     protected $hidden = [
@@ -28,7 +32,18 @@ class Reservation extends Model
 
     protected string $default_filters = ReservationFilter::class;
 
-    protected $casts = [
-        'access_permission' => 'json',
-    ];
+    public function lot()
+    {
+        return $this->belongsTo(Lot::class, 'lot_id')->withTrashed();
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(User::class, 'user_id')->withTrashed();
+    }
+
+    public function approved()
+    {
+        return $this->belongsTo(User::class, 'approved_id')->withTrashed();
+    }
 }
