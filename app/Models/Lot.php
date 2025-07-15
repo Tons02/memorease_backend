@@ -22,6 +22,7 @@ class Lot extends Model
         'reserved_until',
         'price',
         'promo_price',
+        'downpayment_price',
         'promo_until',
         'is_featured',
     ];

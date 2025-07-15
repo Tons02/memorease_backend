@@ -46,7 +46,7 @@ class LotRequest extends FormRequest
                 'regex:/^\d{1,10}(\.\d{1,2})?$/',
             ],
             'downpayment_price' => [
-                'nullable',
+                'required',
                 'numeric',
                 'regex:/^\d{1,10}(\.\d{1,2})?$/',
                 'lte:price',
