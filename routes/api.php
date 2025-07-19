@@ -57,6 +57,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Reservation Controller
     Route::put('reservation-archived/{id}', [ReservationController::class, 'archived']);
     Route::post("reservation", [ReservationController::class, 'store']);
+    Route::patch("reservation-cancel/{id}", [ReservationController::class, 'cancel']);
+    Route::patch("reservation-approve/{id}", [ReservationController::class, 'approve']);
+    Route::patch("reservation-reject/{id}", [ReservationController::class, 'reject']);
     Route::match(['POST', 'PATCH'], 'deceased/{id}', [DeceasedController::class, 'update']);
 
     // Deceased Controller

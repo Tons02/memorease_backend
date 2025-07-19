@@ -16,10 +16,23 @@ class ReservationResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'lot' => $this->lot,
-            'customer' => $this->customer,
-            'appproved' => $this->appproved,
+            'lot' => [
+                'id' => $this->lot->id,
+                'lot_number' => $this->lot->lot_number,
+                'lot_image' => $this->lot->lot_image
+                    ? asset('storage/' . $this->lot->lot_image)
+                    : null,
 
+            ],
+            'customer' => [
+                'id' => $this->customer->id,
+                'fullname' => implode(' ', array_filter([
+                    $this->customer->fname,
+                    $this->customer->mi,
+                    $this->customer->lname,
+                    $this->customer->suffix,
+                ])),
+            ],
             'status' => $this->status,
             'total_downpayment_price' => $this->total_downpayment_price,
             'remarks' => $this->remarks,

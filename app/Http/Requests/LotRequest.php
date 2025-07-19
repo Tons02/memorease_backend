@@ -29,7 +29,9 @@ class LotRequest extends FormRequest
             "lot_number" => [
                 "required",
                 "string",
-                Rule::unique('lots', 'lot_number')->ignore($this->route('id')),
+                Rule::unique('lots', 'lot_number')
+                    ->ignore($this->route('id'))
+                    ->whereNull('deleted_at'),
             ],
             "coordinates" => [
                 "required",

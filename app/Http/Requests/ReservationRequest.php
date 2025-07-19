@@ -24,13 +24,19 @@ class ReservationRequest extends FormRequest
     {
         return [
             'lot_id' => ['required', Rule::exists('lots', 'id')->where('status', 'available')],
-            "user_id" => ["required", "exists:users,id"],
             'total_downpayment_price' => [
                 'required',
                 'numeric',
                 'regex:/^\d{1,15}(\.\d{1,2})?$/',
             ],
             "proof_of_payment" => ["required"],
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            "lot_id.exists" => "This Lot is Already Reserved or Sold",
         ];
     }
 }
