@@ -47,7 +47,7 @@ class ReservationController extends Controller
 
         $lot_id = $request->lot_id;
         if (!auth()->user()) {
-            return $this->responseUnprocessable('Please Login Before you reserve.', );
+            return $this->responseUnprocessable('Please Login Before you reserve.',);
         }
 
         //limit to one pending

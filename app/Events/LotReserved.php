@@ -35,6 +35,7 @@ class LotReserved implements ShouldBroadcast
             'lot_id' => $this->lot->id,
             'lot_number' => $this->lot->lot_number,
             'status' => $this->lot->status,
+            'user_id' => $this->lot,
         ];
     }
 }

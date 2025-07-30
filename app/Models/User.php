@@ -62,12 +62,23 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
+    public function conversations()
+    {
+        return $this->belongsToMany(Conversation::class)
+            ->withTimestamps()
+            ->withPivot('last_read_at');
+    }
+
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+
     public function sendEmailVerificationNotification()
     {
         $this->notify(new VerifyEmailCustom());
     }
 
     protected string $default_filters = UserFilter::class;
-
-
 }

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\CemeteriesController;
+use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\DeceasedController;
 use App\Http\Controllers\Api\LotController;
 use App\Http\Controllers\Api\ReservationController;
@@ -71,4 +72,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::patch('changepassword', [AuthController::class, 'changedPassword']);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::patch('resetpassword/{id}', [AuthController::class, 'resetPassword']);
+
+    Route::get('/conversations', [ChatController::class, 'conversations']);
+    Route::get('/conversations/{id}/messages', [ChatController::class, 'messages']);
+    Route::post('/messages/send', [ChatController::class, 'send']);
+    Route::post('/conversations/start', [ChatController::class, 'startPrivateChat']);
 });
