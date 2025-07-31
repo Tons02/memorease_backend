@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Events\MessageSent;
+use App\Events\NewConversation;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StartPrivateChatMessageRequest;
 use App\Models\Conversation;
 use App\Models\Message;
 use Essa\APIToolKit\Api\ApiResponse;
@@ -56,11 +58,23 @@ class ChatController extends Controller
     }
 
     // Optional: create new private conversation between two users
-    public function startPrivateChat(Request $request)
+    public function startPrivateChat(StartPrivateChatMessageRequest $request)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-        ]);
+        $authUserId = auth()->id();
+        $otherUserId = $request->user_id;
+
+        $conversation = Conversation::where('type', 'private')
+            ->whereHas('users', fn($q) => $q->where('user_id', $authUserId))
+            ->whereHas('users', fn($q) => $q->where('user_id', $otherUserId))
+            ->withCount('users')
+            ->first();
+
+        if ($conversation && $conversation->users_count === 2) {
+            return $this->responseBadRequest(
+                'A conversation with this user already exists.',
+                ''
+            );
+        }
 
         $user = auth('sanctum')->user();
 
@@ -71,20 +85,13 @@ class ChatController extends Controller
                 ($user->suffix ? "{$user->suffix}" : "")
         );
 
-        $authUserId = Auth::id();
-        $otherUserId = $request->user_id;
+        $conversation = Conversation::create([
+            'type' => 'private',
+            'name' => $fullName,
+        ]);
 
-        // Check if a private chat already exists
-        $conversation = Conversation::where('type', 'private')
-            ->whereHas('users', fn($q) => $q->where('user_id', $authUserId))
-            ->whereHas('users', fn($q) => $q->where('user_id', $otherUserId))
-            ->first();
-
-        if (!$conversation) {
-            $conversation = Conversation::create(['type' => 'private', 'name' => $fullName]);
-            $conversation->users()->attach([$authUserId, $otherUserId]);
-        }
-
-        return $this->responseSuccess('Conversation Successfully Created', $conversation->load('users'));
+        $conversation->users()->attach([$authUserId, $otherUserId]);
+        NewConversation::dispatch($conversation, $otherUserId);
+        return $this->responseCreated('Conversation Successfully Created', $conversation->load('users'));
     }
 }

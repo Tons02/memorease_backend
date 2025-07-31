@@ -16,5 +16,9 @@ Broadcast::channel('chat.{conversationId}', function ($user, $conversationId) {
     return true; // Logged in user
 });
 
+Broadcast::channel('chat.{userId}', function ($user, $userId) {
+    return (int) $user->id === (int) $userId;
+});
+
 
 Broadcast::routes(['middleware' => ['auth:sanctum']]);
