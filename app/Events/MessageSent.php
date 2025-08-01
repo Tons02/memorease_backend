@@ -16,25 +16,34 @@ class MessageSent implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $message;
+    public $receiverId;
 
-    public function __construct(Message $message)
+    public function __construct(Message $message, $receiverId)
     {
-        $this->message = $message->load('sender');
+        $this->message = $message;
+        $this->receiverId = $receiverId;
     }
 
     public function broadcastOn()
     {
-        logger("Broadcasting to: chat." . $this->message->conversation_id);
-        return new PrivateChannel('chat.' . $this->message->conversation_id);
+        return new PrivateChannel('user.' . $this->receiverId); // Only receiver will hear this
     }
 
     public function broadcastAs()
     {
-        return 'message.sent'; // 👈 this is the event name
+        return 'message.sent';
     }
 
     public function broadcastWith()
     {
-        return ['message' => $this->message];
+        return [
+            'message' => [
+                'id' => $this->message->id,
+                'body' => $this->message->body,
+                'sender_id' => $this->message->sender_id,
+                'conversation_id' => $this->message->conversation_id,
+                'created_at' => $this->message->created_at->toDateTimeString(),
+            ],
+        ];
     }
 }

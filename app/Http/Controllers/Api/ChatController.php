@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Events\MessageSent;
 use App\Events\NewConversation;
+use App\Events\NewMessageOnConversation;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StartPrivateChatMessageRequest;
 use App\Models\Conversation;
@@ -52,7 +53,15 @@ class ChatController extends Controller
             'body' => $request->content,
         ]);
 
-        broadcast(new MessageSent($message))->toOthers();
+        // Get the receiver's user ID
+        $conversation = $message->conversation()->with('users')->first();
+        $receiver = $conversation->users->firstWhere('id', '!=', Auth::id());
+
+        if ($receiver) {
+            broadcast(new MessageSent($message, $receiver->id));
+        }
+
+        // event(new NewMessageOnConversation($message));
 
         return $this->responseSuccess('Message Send successfully', $message);
     }
