@@ -22,6 +22,7 @@ return new class extends Migration {
             $table->string('birthday');
             $table->string('death_date');
             $table->string('death_certificate');
+            $table->boolean('is_private');
             $table->timestamps();
             $table->softDeletes();
         });

@@ -55,6 +55,7 @@ class DeceasedController extends Controller
             'birthday' => $request->birthday,
             'death_date' => $request->death_date,
             'death_certificate' => $death_certificate,
+            'is_private' => $request->is_private,
         ]);
 
         return $this->responseCreated('Deceased Successfully Created', $create_deceased);
@@ -94,6 +95,7 @@ class DeceasedController extends Controller
         $update_deceased->gender = $request->gender;
         $update_deceased->birthday = $request->birthday;
         $update_deceased->death_date = $request->death_date;
+        $update_deceased->is_private = $request->is_private;
 
         $update_deceased->save();
 

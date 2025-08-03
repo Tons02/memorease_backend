@@ -44,6 +44,9 @@ class DeceasedRequest extends FormRequest
             "death_date" => [
                 "required",
             ],
+            "is_private" => [
+                "required",
+            ],
         ];
     }
 

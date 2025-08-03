@@ -20,9 +20,12 @@ class ChatController extends Controller
     public function conversations()
     {
         $user = Auth::user();
-        $conversations = $user->conversations()->with(['users', 'messages' => function ($query) {
-            $query->latest()->limit(1); // Get last message
-        }])->get();
+        $conversations = $user->conversations()->with([
+            'users',
+            'messages' => function ($query) {
+                $query->latest()->limit(1); // Get last message
+            }
+        ])->get();
 
         return $this->responseSuccess('Conversation display successfully', $conversations);
     }
@@ -70,7 +73,7 @@ class ChatController extends Controller
     public function startPrivateChat(StartPrivateChatMessageRequest $request)
     {
         $authUserId = auth()->id();
-        $otherUserId = $request->user_id;
+        $otherUserId = $request->user_id; //i want the reciever to get the full name and set it the name instead of the creater
 
         $conversation = Conversation::where('type', 'private')
             ->whereHas('users', fn($q) => $q->where('user_id', $authUserId))
@@ -89,9 +92,9 @@ class ChatController extends Controller
 
         $fullName = trim(
             "{$user->fname} " .
-                ($user->mi ? "{$user->mi}. " : "") .
-                "{$user->lname} " .
-                ($user->suffix ? "{$user->suffix}" : "")
+            ($user->mi ? "{$user->mi}. " : "") .
+            "{$user->lname} " .
+            ($user->suffix ? "{$user->suffix}" : "")
         );
 
         $conversation = Conversation::create([

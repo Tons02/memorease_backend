@@ -26,6 +26,7 @@ class Deceased extends Model
         'burial_date',
         'death_date',
         'death_certificate',
+        'is_private'
     ];
 
     protected $hidden = [

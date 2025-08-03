@@ -38,6 +38,8 @@ class DeceasedResource extends JsonResource
             'gender' => $this->gender,
             'birthday' => $this->birthday,
             'death_date' => $this->death_date,
+            'is_private' => $this->is_private,
+            'visibility' => $this->is_private == 1 ? 'Private' : 'Public',
             'death_certificate' => $this->death_certificate
                 ? asset('storage/' . $this->death_certificate)
                 : null,
