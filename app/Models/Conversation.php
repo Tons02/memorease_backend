@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Filters\ConversationFilter;
+use Essa\APIToolKit\Filters\Filterable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Conversation extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, Filterable;
 
     protected $fillable = ['type', 'name'];
 
@@ -23,4 +25,7 @@ class Conversation extends Model
     {
         return $this->hasMany(Message::class);
     }
+
+
+    protected string $default_filters = ConversationFilter::class;
 }
