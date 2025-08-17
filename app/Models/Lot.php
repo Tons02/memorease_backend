@@ -15,6 +15,9 @@ class Lot extends Model
     protected $fillable = [
         'id',
         'lot_image',
+        'second_lot_image',
+        'third_lot_image',
+        'fourth_lot_image',
         'lot_number',
         'description',
         'coordinates',

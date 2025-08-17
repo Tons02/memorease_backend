@@ -36,15 +36,23 @@ class LotController extends Controller
 
     public function store(LotRequest $request)
     {
-
-        $request->file('lot_image');
+        // Handle lot_image (first image)
         $lot_image = $request->file('lot_image')?->store('lot', 'public');
 
+        // Handle second, third, and fourth images
+        $second_lot_image = $request->file('second_lot_image')?->store('lot', 'public');
+        $third_lot_image = $request->file('third_lot_image')?->store('lot', 'public');
+        $fourth_lot_image = $request->file('fourth_lot_image')?->store('lot', 'public');
+
+        // Create the lot record
         $create_lot = Lot::create([
             "lot_image" => $lot_image,
+            "second_lot_image" => $second_lot_image,
+            "third_lot_image" => $third_lot_image,
+            "fourth_lot_image" => $fourth_lot_image,
             "lot_number" => $request->lot_number,
             "description" => $request->description,
-            "coordinates" => $coordinates = is_string($request->coordinates)
+            "coordinates" => is_string($request->coordinates)
                 ? json_decode($request->coordinates, true)
                 : $request->coordinates,
             "status" => $request->status,
@@ -59,6 +67,7 @@ class LotController extends Controller
         return $this->responseCreated('Lot Successfully Created', $create_lot);
     }
 
+
     public function update(LotRequest $request, $id)
     {
         $lot = Lot::find($id);
@@ -66,26 +75,52 @@ class LotController extends Controller
         if (!$lot) {
             return $this->responseUnprocessable('', 'Invalid ID provided for updating. Please check the ID and try again.');
         }
+
         // Handle lot_image replacement
         if ($request->hasFile('lot_image')) {
             if ($lot->lot_image && Storage::disk('public')->exists($lot->lot_image)) {
                 Storage::disk('public')->delete($lot->lot_image);
             }
-            $lot->lot_image = $request->file('lot_image')->store('lot_image', 'public');
+            $lot->lot_image = $request->file('lot_image')->store('lot', 'public');
         }
 
-        $lot->lot_number = $request['lot_number'];
-        $lot->description = $request['description'];
-        $lot->coordinates = $coordinates = is_string($request->coordinates)
+        // Handle second_lot_image replacement
+        if ($request->hasFile('second_lot_image')) {
+            if ($lot->second_lot_image && Storage::disk('public')->exists($lot->second_lot_image)) {
+                Storage::disk('public')->delete($lot->second_lot_image);
+            }
+            $lot->second_lot_image = $request->file('second_lot_image')->store('lot', 'public');
+        }
+
+        // Handle third_lot_image replacement
+        if ($request->hasFile('third_lot_image')) {
+            if ($lot->third_lot_image && Storage::disk('public')->exists($lot->third_lot_image)) {
+                Storage::disk('public')->delete($lot->third_lot_image);
+            }
+            $lot->third_lot_image = $request->file('third_lot_image')->store('lot', 'public');
+        }
+
+        // Handle fourth_lot_image replacement
+        if ($request->hasFile('fourth_lot_image')) {
+            if ($lot->fourth_lot_image && Storage::disk('public')->exists($lot->fourth_lot_image)) {
+                Storage::disk('public')->delete($lot->fourth_lot_image);
+            }
+            $lot->fourth_lot_image = $request->file('fourth_lot_image')->store('lot', 'public');
+        }
+
+        // Update other fields
+        $lot->lot_number = $request->lot_number;
+        $lot->description = $request->description;
+        $lot->coordinates = is_string($request->coordinates)
             ? json_decode($request->coordinates, true)
             : $request->coordinates;
-        $lot->status = $request['status'];
-        $lot->reserved_until = $request['reserved_until'];
-        $lot->price = $request['price'];
-        $lot->promo_price = $request['promo_price'];
-        $lot->downpayment_price = $request['downpayment_price'];
-        $lot->promo_until = $request['promo_until'];
-        $lot->is_featured = $request['is_featured'];
+        $lot->status = $request->status;
+        $lot->reserved_until = $request->reserved_until;
+        $lot->price = $request->price;
+        $lot->promo_price = $request->promo_price;
+        $lot->downpayment_price = $request->downpayment_price;
+        $lot->promo_until = $request->promo_until;
+        $lot->is_featured = $request->is_featured;
 
         if (!$lot->isDirty()) {
             return $this->responseSuccess('No Changes', $lot);
@@ -95,6 +130,7 @@ class LotController extends Controller
 
         return $this->responseSuccess('Lot successfully updated', $lot);
     }
+
 
 
     public function archived(Request $request, $id)

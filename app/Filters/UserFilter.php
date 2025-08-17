@@ -13,4 +13,14 @@ class UserFilter extends QueryFilters
         'mi',
         'lname'
     ];
+
+
+    public function role_type($role_type)
+    {
+        if ($role_type) {
+            return $this->builder->where('role_type', $role_type);
+        }
+
+        return $this->builder;
+    }
 }

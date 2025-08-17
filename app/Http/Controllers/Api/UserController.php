@@ -70,6 +70,7 @@ class UserController extends Controller
         $userID->birthday = $request["birthday"];
         $userID->address = $request['address'];
         $userID->email = $request['email'];
+        $userID->username = $request['username'];
         $userID->role_type = $request['role_type'];
 
         if (!$userID->isDirty()) {
