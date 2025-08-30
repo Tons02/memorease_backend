@@ -11,7 +11,9 @@ class UserFilter extends QueryFilters
     protected array $columnSearch = [
         'fname',
         'mi',
-        'lname'
+        'lname',
+        'email',
+        'username'
     ];
 
 

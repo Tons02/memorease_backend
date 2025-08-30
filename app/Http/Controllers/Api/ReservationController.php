@@ -13,6 +13,7 @@ use App\Models\Reservation;
 use Carbon\Carbon;
 use Essa\APIToolKit\Api\ApiResponse;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Excel;
 
 class ReservationController extends Controller
 {
@@ -47,7 +48,7 @@ class ReservationController extends Controller
 
         $lot_id = $request->lot_id;
         if (!auth()->user()) {
-            return $this->responseUnprocessable('Please Login Before you reserve.',);
+            return $this->responseUnprocessable('Please Login Before you reserve.', );
         }
 
         //limit to one pending
@@ -101,6 +102,8 @@ class ReservationController extends Controller
         $lot = Lot::findOrFail($reservation->lot_id);
 
         $reservation->status = 'approved';
+        $reservation->approved_date = Carbon::now();
+        $reservation->approved_id = auth()->id();
 
         $lot->status = 'sold';
 
@@ -173,6 +176,7 @@ class ReservationController extends Controller
 
         $reservation->status = 'rejected';
         $reservation->remarks = $request->remarks;
+        $reservation->approved_id = auth()->id();
 
         $lot->status = 'available';
 
@@ -184,5 +188,41 @@ class ReservationController extends Controller
         event(new LotReserved($lot));
 
         return $this->responseSuccess('Successfully Rejected', $reservation);
+    }
+
+    public function reservation_sales(Request $request)
+    {
+        $start_date = Carbon::parse($request->query('start_date'))->startOfDay();
+        $end_date = Carbon::parse($request->query('end_date'))->endOfDay();
+
+        $reservations = Reservation::selectRaw('DATE(approved_date) as day, SUM(total_downpayment_price) as total_sales')
+            ->whereBetween('approved_date', [$start_date, $end_date])
+            ->groupBy('day')
+            ->orderBy('day', 'asc')
+            ->get();
+
+        return $this->responseSuccess('Reservation sales display successfully', $reservations);
+    }
+
+    public function total_number_of_reservation_this_month(Request $request)
+    {
+        $status = $request->query('status');
+
+        $reservations = Reservation::where('status', $status)
+            ->whereMonth('reserved_at', Carbon::now()->month)
+            ->whereYear('reserved_at', Carbon::now()->year)
+            ->count();
+
+        return $this->responseSuccess(
+            'Reservation count displayed successfully',
+            $reservations
+        );
+    }
+
+    public function export(Request $request)
+    {
+        $target_location_id = $request->query('target_location_id', null);
+
+        return Excel::download(new TrafficFootCountExport($target_location_id), 'Foot Counts.xlsx');
     }
 }

@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\DeceasedController;
 use App\Http\Controllers\Api\LotController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\RoleController;
+use App\Http\Controllers\Api\TermsAndAgreementController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
@@ -38,6 +39,7 @@ Route::get("cemeteries", [CemeteriesController::class, 'index']);
 Route::get("lot", [LotController::class, 'index']);
 Route::get("reservation", [ReservationController::class, 'index']);
 Route::get("deceased", [DeceasedController::class, 'index']);
+Route::get("terms", [TermsAndAgreementController::class, 'index']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
     // User Controller
@@ -59,6 +61,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('reservation-archived/{id}', [ReservationController::class, 'archived']);
     Route::post("reservation", [ReservationController::class, 'store']);
     Route::patch("reservation-cancel/{id}", [ReservationController::class, 'cancel']);
+    Route::get("reservation-sales", [ReservationController::class, 'reservation_sales']);
+    Route::get("reservation-status-counts", [ReservationController::class, 'total_number_of_reservation_this_month']);
     Route::patch("reservation-approve/{id}", [ReservationController::class, 'approve']);
     Route::patch("reservation-reject/{id}", [ReservationController::class, 'reject']);
     Route::match(['POST', 'PATCH'], 'deceased/{id}', [DeceasedController::class, 'update']);
@@ -67,6 +71,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('deceased-archived/{id}', [DeceasedController::class, 'archived']);
     Route::post("deceased", [DeceasedController::class, 'store']);
     Route::patch("deceased/{id}", [DeceasedController::class, 'update']);
+
+    // Terms and agreement Controller
+    Route::put('terms-archived/{id}', [TermsAndAgreementController::class, 'archived']);
+    Route::post("terms", [TermsAndAgreementController::class, 'store']);
+    Route::patch("terms/{id}", [TermsAndAgreementController::class, 'update']);
 
     // auth controller
     Route::patch('changepassword', [AuthController::class, 'changedPassword']);
