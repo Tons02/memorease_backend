@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Events\ApprovedReservation;
 use App\Events\LotReserved;
+use App\Exports\ReservationSales;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CancelReservationRequest;
 use App\Http\Requests\ReservationRequest;
@@ -13,7 +14,7 @@ use App\Models\Reservation;
 use Carbon\Carbon;
 use Essa\APIToolKit\Api\ApiResponse;
 use Illuminate\Http\Request;
-use Maatwebsite\Excel\Excel;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReservationController extends Controller
 {
@@ -23,13 +24,18 @@ class ReservationController extends Controller
     {
         $status = $request->query('status');
         $pagination = $request->query('pagination');
+        $start_date = $request->query('start_date');
+        $end_date = $request->query('end_date');
 
         $reservation = Reservation::when($status === 'inactive', function ($query) {
-            $query->onlyTrashed();
+        $query->onlyTrashed();
         })
-            ->orderBy('created_at', 'desc')
-            ->useFilters()
-            ->dynamicPaginate();
+        ->when($start_date && $end_date, function ($query) use ($start_date, $end_date) {
+            $query->whereBetween('reserved_at', [$start_date, $end_date]);
+        })
+        ->orderBy('created_at', 'desc')
+        ->useFilters()
+        ->dynamicPaginate();
 
         if (!$pagination) {
             ReservationResource::collection($reservation);
@@ -219,10 +225,27 @@ class ReservationController extends Controller
         );
     }
 
-    public function export(Request $request)
-    {
-        $target_location_id = $request->query('target_location_id', null);
+   public function reservation_export(Request $request)
+{
+    $status = $request->query('status');
+    $start_date = $request->query('start_date');
+    $end_date = $request->query('end_date');
 
-        return Excel::download(new TrafficFootCountExport($target_location_id), 'Foot Counts.xlsx');
-    }
+    // $query = Reservation::with('lot', 'customer','approved');
+
+    //     if ($status) {
+    //         $query->where('status', $status);
+    //     }
+
+    //     if ($start_date && $end_date) {
+    //         $query->whereBetween('reserved_at', [$start_date, $end_date]);
+    //     }
+
+    //     return $query->get();
+
+    return Excel::download(
+        new ReservationSales($status, $start_date, $end_date),
+        'Reservation Sales.xlsx'
+    );
+}
 }

@@ -62,6 +62,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post("reservation", [ReservationController::class, 'store']);
     Route::patch("reservation-cancel/{id}", [ReservationController::class, 'cancel']);
     Route::get("reservation-sales", [ReservationController::class, 'reservation_sales']);
+    Route::get("reservation-exports", [ReservationController::class, 'reservation_export']);
     Route::get("reservation-status-counts", [ReservationController::class, 'total_number_of_reservation_this_month']);
     Route::patch("reservation-approve/{id}", [ReservationController::class, 'approve']);
     Route::patch("reservation-reject/{id}", [ReservationController::class, 'reject']);

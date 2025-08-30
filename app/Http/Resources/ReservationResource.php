@@ -43,6 +43,15 @@ class ReservationResource extends JsonResource
                 : null,
             'paid_at' => $this->paid_at,
             'approved_date' => $this->approved_date,
+            'approved_by' => $this->approved ? [
+                'id' => $this->approved->id,
+                'fullname' => implode(' ', array_filter([
+                    $this->approved->fname,
+                    $this->approved->mi,
+                    $this->approved->lname,
+                    $this->approved->suffix,
+                ])),
+            ] : null,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
