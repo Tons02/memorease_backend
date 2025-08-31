@@ -49,7 +49,7 @@ class ReservationSales implements FromCollection, WithHeadings, WithMapping, Wit
             'Lot Number',
             'Customer',
             'Downpayment Price',
-            'Reserved Date',   // <-- Added Reserved Date
+            'Reserved Date',   
             'Approved Date',
             'Approved By',
             'Status',

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use Carbon\Carbon;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserRequest;
@@ -44,6 +45,7 @@ class UserController extends Controller
             "address" => $request["address"],
             "username" => $request["username"],
             "email" => $request["email"],
+            'email_verified_at' => $request['role_type'] === 'admin' ? Carbon::now() : null,
             "password" => $password,
             "role_type" => $request["role_type"],
         ]);
