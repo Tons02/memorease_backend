@@ -55,9 +55,20 @@ class RegistrationRequest extends FormRequest
             ],
             'password' => [
                 'required',
-                'min:4',
-                'confirmed'
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/[0-9]/', 
             ],
         ];
+        
     }
+
+    public function messages()
+    {
+        return [
+            'password.regex' => 'The password must contain at least one number.',
+        ];
+    }
+
 }
