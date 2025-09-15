@@ -9,6 +9,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StartPrivateChatMessageRequest;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Models\MessageStatus;
+use Carbon\Carbon;
 use Essa\APIToolKit\Api\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,9 +22,51 @@ class ChatController extends Controller
     public function conversations()
     {
         $user = Auth::user();
-        $conversations = $user->conversations()->with(['users', 'messages' => function ($query) {
-            $query->latest()->limit(1); // Get last message
-        }])->get();
+
+        $conversations = $user->conversations()
+            ->with([
+                'users',
+                'messages' => function ($query) {
+                    $query->latest()->limit(1); // Get last message
+                }
+            ])
+            ->get()
+            ->map(function ($conversation) use ($user) {
+                // Identify the other participant
+                $receiver = $conversation->users->where('id', '!=', $user->id)->first();
+
+                // Sender (current authenticated user) counts
+                $senderCounts = \App\Models\MessageStatus::whereHas('message', function ($q) use ($conversation, $user) {
+                    $q->where('conversation_id', $conversation->id)
+                        ->where('sender_id', $user->id);
+                })
+                    ->selectRaw("
+                    SUM(status = 'sent') as new_message,
+                    SUM(status = 'received') as received_count,
+                    SUM(status = 'read') as read_count
+                ")
+                    ->first();
+
+                // Receiver (other participant) counts
+                $receiverCounts = \App\Models\MessageStatus::whereHas('message', function ($q) use ($conversation, $receiver) {
+                    $q->where('conversation_id', $conversation->id)
+                        ->where('sender_id', $receiver?->id);
+                })
+                    ->selectRaw("
+                    SUM(status = 'sent') as new_message,
+                    SUM(status = 'received') as received_count,
+                    SUM(status = 'read') as read_count
+                ")
+                    ->first();
+
+                // Attach custom object
+                $conversation->message_status = [
+                    'sender' => $senderCounts,
+                    'receiver' => $receiverCounts,
+                ];
+
+                return $conversation;
+            });
 
         return $this->responseSuccess('Conversation display successfully', $conversations);
     }
@@ -47,21 +91,50 @@ class ChatController extends Controller
             'content' => 'required|string',
         ]);
 
+        // return Auth::id();
+
+        $conversation = Conversation::with('users')->find($request->conversation_id);
+
+        // Get the other user (exclude the authenticated user)
+        $receiver = $conversation->users->firstWhere('id', '!=', Auth::id());
+        $receiverId = $receiver ? $receiver->id : null;
+
+        // Create the message
         $message = Message::create([
             'conversation_id' => $request->conversation_id,
             'sender_id' => Auth::id(),
             'body' => $request->content,
         ]);
 
+        // Save message status for sender
+        MessageStatus::create([
+            'message_id' => $message->id,
+            'user_id' => $receiverId,
+            'status' => 'sent',
+        ]);
+
+
+
         // Get the receiver's user ID
         $conversation = $message->conversation()->with('users')->first();
-        $receiver = $conversation->users->firstWhere('id', '!=', Auth::id());
+
+        $message_count = $message_count = $conversation->messages()->count();
 
         if ($receiver) {
             broadcast(new MessageSent($message, $receiver->id));
         }
 
-        // event(new NewMessageOnConversation($message));
+        if ($message_count == 1) {
+
+            $message_for_new_conversation = Message::create([
+                'conversation_id' => $request->conversation_id,
+                'sender_id' => $receiverId,
+                'body' => "Your Message Has been recieved, We will get back to you shortly.",
+                'created_at' => Carbon::now()->addSeconds(1),
+            ]);
+
+            broadcast(new MessageSent($message_for_new_conversation, Auth::id()));
+        }
 
         return $this->responseSuccess('Message Send successfully', $message);
     }
@@ -102,5 +175,47 @@ class ChatController extends Controller
         $conversation->users()->attach([$authUserId, $otherUserId]);
         NewConversation::dispatch($conversation, $otherUserId);
         return $this->responseCreated('Conversation Successfully Created', $conversation->load('users'));
+    }
+
+    public function update_message_status($id)
+    {
+        $userId = Auth::id();
+
+        // Get the conversation
+        $conversation = Conversation::with('users')->findOrFail($id);
+
+        // Ensure the user is part of this conversation
+        if (! $conversation->users->contains($userId)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Find all message statuses for this conversation where the current user is the receiver and status != read
+        $updated = MessageStatus::whereHas('message', function ($q) use ($conversation) {
+            $q->where('conversation_id', $conversation->id);
+        })
+            ->where('user_id', $userId)
+            ->where('status', '!=', 'read')
+            ->update([
+                'status' => 'read',
+                'updated_at' => now(),
+            ]);
+
+        return $this->responseSuccess(
+            'Message statuses updated successfully',
+            ['updated_count' => $updated]
+        );
+    }
+
+    public function get_conversations_counts(Request $request)
+    {
+        $user = Auth::user();
+        $messages_count = MessageStatus::where('user_id', $user->id)
+            ->where('status', 'sent')
+            ->count();
+
+        return $this->responseSuccess(
+            'Message count display successfully',
+            ['updated_count' => $messages_count]
+        );
     }
 }

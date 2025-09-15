@@ -10,7 +10,7 @@ class Message extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['conversation_id', 'sender_id', 'body'];
+    protected $fillable = ['conversation_id', 'sender_id', 'body', 'created_at'];
 
     public function conversation()
     {

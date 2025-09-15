@@ -85,6 +85,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/conversations', [ChatController::class, 'conversations']);
     Route::get('/conversations/{id}/messages', [ChatController::class, 'messages']);
+    Route::get('/get-conversations-counts', [ChatController::class, 'get_conversations_counts']);
     Route::post('/messages/send', [ChatController::class, 'send']);
     Route::post('/conversations/start', [ChatController::class, 'startPrivateChat']);
+    Route::patch('/update-message-status/{id}', [ChatController::class, 'update_message_status']);
 });

@@ -26,6 +26,12 @@ class Conversation extends Model
         return $this->hasMany(Message::class);
     }
 
+    public function messageStatuses()
+    {
+        return $this->hasManyThrough(MessageStatus::class, Message::class);
+    }
+
+
 
     protected string $default_filters = ConversationFilter::class;
 }
