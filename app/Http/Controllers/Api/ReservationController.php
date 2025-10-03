@@ -9,11 +9,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CancelReservationRequest;
 use App\Http\Requests\ReservationRequest;
 use App\Http\Resources\ReservationResource;
+use App\Mail\ReservationApproved;
 use App\Models\Lot;
 use App\Models\Reservation;
 use Carbon\Carbon;
 use Essa\APIToolKit\Api\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ReservationController extends Controller
@@ -28,14 +30,14 @@ class ReservationController extends Controller
         $end_date = $request->query('end_date');
 
         $reservation = Reservation::when($status === 'inactive', function ($query) {
-        $query->onlyTrashed();
+            $query->onlyTrashed();
         })
-        ->when($start_date && $end_date, function ($query) use ($start_date, $end_date) {
-            $query->whereBetween('reserved_at', [$start_date, $end_date]);
-        })
-        ->orderBy('created_at', 'desc')
-        ->useFilters()
-        ->dynamicPaginate();
+            ->when($start_date && $end_date, function ($query) use ($start_date, $end_date) {
+                $query->whereBetween('reserved_at', [$start_date, $end_date]);
+            })
+            ->orderBy('created_at', 'desc')
+            ->useFilters()
+            ->dynamicPaginate();
 
         if (!$pagination) {
             ReservationResource::collection($reservation);
@@ -54,7 +56,7 @@ class ReservationController extends Controller
 
         $lot_id = $request->lot_id;
         if (!auth()->user()) {
-            return $this->responseUnprocessable('Please Login Before you reserve.', );
+            return $this->responseUnprocessable('Please Login Before you reserve.',);
         }
 
         //limit to one pending
@@ -86,11 +88,13 @@ class ReservationController extends Controller
 
     public function approve(Request $request, $id)
     {
-        $reservation = Reservation::find($id);
+        $reservation = Reservation::with('customer')->find($id);
 
         if (!$reservation) {
             return $this->responseUnprocessable('', 'Invalid ID provided for updating. Please check the ID and try again.');
         }
+
+        $customer_email = $reservation->customer->email;
 
         if ($reservation->status == "canceled") {
             return $this->responseUnprocessable('Already Canceled', '');
@@ -104,20 +108,36 @@ class ReservationController extends Controller
             return $this->responseUnprocessable('', 'Already Approved Cant be Approve again');
         }
 
-
         $lot = Lot::findOrFail($reservation->lot_id);
 
+        // Update reservation status
         $reservation->status = 'approved';
         $reservation->approved_date = Carbon::now();
         $reservation->approved_id = auth()->id();
 
+        // Update lot status
         $lot->status = 'sold';
 
+        // Save changes
         $reservation->save();
-
         $lot->save();
 
+        // Send email notification
+        try {
+            if ($customer_email) {
+                \Log::info('Attempting to send email to: ' . $customer_email);
+                Mail::to($customer_email)->send(new ReservationApproved($reservation, $lot));
+                \Log::info('Email sent successfully to: ' . $customer_email);
+            } else {
+                \Log::warning('Customer email is empty for reservation ID: ' . $reservation->id);
+            }
+        } catch (\Exception $e) {
+            // Log the error but don't fail the approval process
+            \Log::error('Failed to send reservation approval email: ' . $e->getMessage());
+            // \Log::error('Error trace: ' . $e->getTraceAsString());
+        }
 
+        // Fire the event
         event(new LotReserved($lot));
 
         return $this->responseSuccess('Successfully Approved', $reservation);
@@ -146,6 +166,7 @@ class ReservationController extends Controller
         $reservation->status = 'canceled';
 
         $lot->status = 'available';
+        $reservation->remarks = $request->remarks;
 
         $reservation->save();
 
@@ -225,27 +246,27 @@ class ReservationController extends Controller
         );
     }
 
-   public function reservation_export(Request $request)
-{
-    $status = $request->query('status');
-    $start_date = $request->query('start_date');
-    $end_date = $request->query('end_date');
+    public function reservation_export(Request $request)
+    {
+        $status = $request->query('status');
+        $start_date = $request->query('start_date');
+        $end_date = $request->query('end_date');
 
-    // $query = Reservation::with('lot', 'customer','approved');
+        // $query = Reservation::with('lot', 'customer','approved');
 
-    //     if ($status) {
-    //         $query->where('status', $status);
-    //     }
+        //     if ($status) {
+        //         $query->where('status', $status);
+        //     }
 
-    //     if ($start_date && $end_date) {
-    //         $query->whereBetween('reserved_at', [$start_date, $end_date]);
-    //     }
+        //     if ($start_date && $end_date) {
+        //         $query->whereBetween('reserved_at', [$start_date, $end_date]);
+        //     }
 
-    //     return $query->get();
+        //     return $query->get();
 
-    return Excel::download(
-        new ReservationSales($status, $start_date, $end_date),
-        'Reservation Sales.xlsx'
-    );
-}
+        return Excel::download(
+            new ReservationSales($status, $start_date, $end_date),
+            'Reservation Sales.xlsx'
+        );
+    }
 }
