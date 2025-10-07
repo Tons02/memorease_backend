@@ -27,7 +27,7 @@ class ChatController extends Controller
             ->with([
                 'users',
                 'messages' => function ($query) {
-                    $query->latest()->limit(1); // Get last message
+                    $query->latest()->limit(1)->select('id', 'conversation_id', 'sender_id', 'body', 'attachments', 'created_at');
                 }
             ])
             ->get()
@@ -88,10 +88,23 @@ class ChatController extends Controller
     {
         $request->validate([
             'conversation_id' => 'required|exists:conversations,id',
-            'content' => 'required|string',
+            'content' => 'required_without:attachments|string|nullable',
+            'attachments' => 'required_without:content|array|nullable',
+            'attachments.*' => 'file|mimes:jpg,jpeg,png,gif,mp4,mov,avi|max:20480',
         ]);
 
-        // return Auth::id();
+
+        $attachments = [];
+
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                $path = $file->store('messages', 'public'); // store under storage/app/public/messages
+                $attachments[] = [
+                    'type' => str_starts_with($file->getMimeType(), 'video') ? 'video' : 'image',
+                    'url' => asset('storage/' . $path)
+                ];
+            }
+        }
 
         $conversation = Conversation::with('users')->find($request->conversation_id);
 
@@ -104,6 +117,7 @@ class ChatController extends Controller
             'conversation_id' => $request->conversation_id,
             'sender_id' => Auth::id(),
             'body' => $request->content,
+            'attachments' => $attachments ? json_encode($attachments) : null,
         ]);
 
         // Save message status for sender

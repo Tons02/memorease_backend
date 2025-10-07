@@ -23,4 +23,8 @@ class DeceasedFilter extends QueryFilters
 
         return $this;
     }
+
+    protected array $relationSearch = [
+        'lot' => ['lot_number', 'description'],
+    ];
 }

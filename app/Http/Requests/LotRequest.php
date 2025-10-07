@@ -33,6 +33,13 @@ class LotRequest extends FormRequest
                     ->ignore($this->route('id'))
                     ->whereNull('deleted_at'),
             ],
+            'lot_image' => [
+                'required',              // Make it required (optional if not mandatory)
+                'file',                  // Ensure it's a file
+                'image',                 // Ensure it's an image
+                'mimes:jpeg,png,jpg,gif', // Allowed types
+                'max:10120',              // Max size in KB (5MB)
+            ],
             "coordinates" => [
                 "required",
             ],
@@ -63,6 +70,16 @@ class LotRequest extends FormRequest
                 "nullable",
                 "required",
             ],
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'lot_image.required' => 'Please upload an image for the lot.',
+            'lot_image.image' => 'The file must be an image.',
+            'lot_image.mimes' => 'Only jpeg, png, jpg, and gif files are allowed.',
+            'lot_image.max' => 'The image size must not exceed 5MB.',
         ];
     }
 }
