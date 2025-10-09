@@ -25,6 +25,10 @@ class ReservationFilter extends QueryFilters
 
     public function status($status)
     {
-        return $this->builder->where('status', $status);
+        if (!is_null($status)) {
+            $this->builder->where('status', $status);
+        }
+
+        return $this;
     }
 }

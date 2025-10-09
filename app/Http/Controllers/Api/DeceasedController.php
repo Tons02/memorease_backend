@@ -18,10 +18,19 @@ class DeceasedController extends Controller
     {
         $status = $request->query('status');
         $pagination = $request->query('pagination');
+        $is_customer = $request->query('is_customer');
+
+        $userId = $request->query('user_id');
 
         $Deceased = Deceased::with('lot')
             ->when($status === "inactive", function ($query) {
                 $query->onlyTrashed();
+            })
+            ->when($is_customer == 'true', function ($query) use ($userId) {
+                $query->whereHas('lot.reservations', function ($query) use ($userId) {
+                    $query->where('user_id', $userId)
+                        ->where('status', 'approved');
+                });
             })
             ->orderBy('created_at', 'desc')
             ->useFilters()
@@ -35,6 +44,8 @@ class DeceasedController extends Controller
 
         return $this->responseSuccess('Deceased display successfully', $Deceased);
     }
+
+
 
     public function store(DeceasedRequest $request)
     {

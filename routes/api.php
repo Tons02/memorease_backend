@@ -60,6 +60,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Reservation Controller
     Route::put('reservation-archived/{id}', [ReservationController::class, 'archived']);
     Route::post("reservation", [ReservationController::class, 'store']);
+    Route::post("reservation-walk-in", [ReservationController::class, 'walk_in']);
     Route::patch("reservation-cancel/{id}", [ReservationController::class, 'cancel']);
     Route::get("reservation-sales", [ReservationController::class, 'reservation_sales']);
     Route::get("reservation-exports", [ReservationController::class, 'reservation_export']);
@@ -80,11 +81,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // auth controller
     Route::patch('changepassword', [AuthController::class, 'changedPassword']);
+    Route::patch('change-email/{id}', [AuthController::class, 'changeEmail']);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::patch('resetpassword/{id}', [AuthController::class, 'resetPassword']);
 
+
     Route::get('/conversations', [ChatController::class, 'conversations']);
     Route::get('/conversations/{id}/messages', [ChatController::class, 'messages']);
+    Route::get('/get-conversations-counts', [ChatController::class, 'get_conversations_counts']);
     Route::post('/messages/send', [ChatController::class, 'send']);
     Route::post('/conversations/start', [ChatController::class, 'startPrivateChat']);
+    Route::patch('/update-message-status/{id}', [ChatController::class, 'update_message_status']);
 });

@@ -40,4 +40,14 @@ class Lot extends Model
         'coordinates' => 'json',
         'is_featured' => 'boolean'
     ];
+
+    public function deceased()
+    {
+        return $this->hasOne(Deceased::class, 'lot_id'); // assuming 1 deceased per lot
+    }
+
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class, 'lot_id');
+    }
 }

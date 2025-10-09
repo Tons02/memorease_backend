@@ -8,12 +8,16 @@ use App\Exports\ReservationSales;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CancelReservationRequest;
 use App\Http\Requests\ReservationRequest;
+use App\Http\Requests\WalkInRequest;
 use App\Http\Resources\ReservationResource;
+use App\Mail\WalkInReservationMail;
 use App\Models\Lot;
 use App\Models\Reservation;
+use App\Models\User;
 use Carbon\Carbon;
 use Essa\APIToolKit\Api\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ReservationController extends Controller
@@ -28,14 +32,14 @@ class ReservationController extends Controller
         $end_date = $request->query('end_date');
 
         $reservation = Reservation::when($status === 'inactive', function ($query) {
-        $query->onlyTrashed();
+            $query->onlyTrashed();
         })
-        ->when($start_date && $end_date, function ($query) use ($start_date, $end_date) {
-            $query->whereBetween('reserved_at', [$start_date, $end_date]);
-        })
-        ->orderBy('created_at', 'desc')
-        ->useFilters()
-        ->dynamicPaginate();
+            ->when($start_date && $end_date, function ($query) use ($start_date, $end_date) {
+                $query->whereBetween('reserved_at', [$start_date, $end_date]);
+            })
+            ->orderBy('created_at', 'desc')
+            ->useFilters()
+            ->dynamicPaginate();
 
         if (!$pagination) {
             ReservationResource::collection($reservation);
@@ -54,7 +58,7 @@ class ReservationController extends Controller
 
         $lot_id = $request->lot_id;
         if (!auth()->user()) {
-            return $this->responseUnprocessable('Please Login Before you reserve.', );
+            return $this->responseUnprocessable('Please Login Before you reserve.',);
         }
 
         //limit to one pending
@@ -80,6 +84,63 @@ class ReservationController extends Controller
 
         // Fire Event
         event(new LotReserved($lot));
+
+        return $this->responseCreated('Reservation Successfully Created', $create_reservation);
+    }
+
+    public function walk_in(WalkInRequest $request)
+    {
+        $request->file('proof_of_payment');
+        $proof_of_payment = $request->file('proof_of_payment')?->store('proof_of_payment', 'public');
+
+        $lot = Lot::find($request->lot_id);
+        if (!$lot) {
+            return $this->responseUnprocessable('', 'Invalid ID provided for reservation. Please check the ID and try again.');
+        }
+
+        $lot->update(['status' => 'sold']);
+
+        $create_user = User::create([
+            "profile_picture" => "default_profile.jpg",
+            "fname" => $request["fname"],
+            "mi" => $request["mi"],
+            "lname" => $request["lname"],
+            "suffix" => $request["suffix"],
+            "gender" => $request["gender"],
+            "mobile_number" => $request["mobile_number"],
+            "birthday" => $request["birthday"],
+            "address" => $request["address"],
+            "username" => $request["username"],
+            "email" => $request["email"],
+            "password" => $request["username"],
+            "role_type" => "customer",
+            "email_verified_at" => Carbon::now(),
+        ]);
+
+        // Create Reservation
+        $create_reservation = Reservation::create([
+            'lot_id' => $lot->id,
+            'user_id' => $create_user->id,
+            'total_downpayment_price' => $lot->downpayment_price,
+            'proof_of_payment' => $proof_of_payment,
+            'status' => "approved",
+            'reserved_at' => Carbon::now(),
+            'approved_date' => Carbon::now(),
+            'approved_id' => auth()->id()
+        ]);
+
+        // Fire Event
+        event(new LotReserved($lot));
+
+        if ($request->email) {
+            // Send Email
+            $create_user->notify(new \App\Notifications\WalkInReservationNotification(
+                $create_user,
+                $create_reservation,
+                $lot,
+                $request["username"]
+            ));
+        }
 
         return $this->responseCreated('Reservation Successfully Created', $create_reservation);
     }
@@ -225,27 +286,27 @@ class ReservationController extends Controller
         );
     }
 
-   public function reservation_export(Request $request)
-{
-    $status = $request->query('status');
-    $start_date = $request->query('start_date');
-    $end_date = $request->query('end_date');
+    public function reservation_export(Request $request)
+    {
+        $status = $request->query('status');
+        $start_date = $request->query('start_date');
+        $end_date = $request->query('end_date');
 
-    // $query = Reservation::with('lot', 'customer','approved');
+        // $query = Reservation::with('lot', 'customer','approved');
 
-    //     if ($status) {
-    //         $query->where('status', $status);
-    //     }
+        //     if ($status) {
+        //         $query->where('status', $status);
+        //     }
 
-    //     if ($start_date && $end_date) {
-    //         $query->whereBetween('reserved_at', [$start_date, $end_date]);
-    //     }
+        //     if ($start_date && $end_date) {
+        //         $query->whereBetween('reserved_at', [$start_date, $end_date]);
+        //     }
 
-    //     return $query->get();
+        //     return $query->get();
 
-    return Excel::download(
-        new ReservationSales($status, $start_date, $end_date),
-        'Reservation Sales.xlsx'
-    );
-}
+        return Excel::download(
+            new ReservationSales($status, $start_date, $end_date),
+            'Reservation Sales.xlsx'
+        );
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ChangeEmailRequest;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\RegistrationRequest;
 use App\Models\Role;
@@ -115,6 +116,21 @@ class AuthController extends Controller
         ]);
 
         return $this->responseSuccess('The Password has been reset');
+    }
+
+    public function changeEmail(ChangeEmailRequest $request, $id)
+    {
+        $user = User::where('id', $id)->first();
+
+        if (!$user) {
+            return $this->responseUnprocessable('', 'Invalid ID provided for updating email. Please check the ID and try again.');
+        }
+
+        $user->update([
+            'email' => $request->email,
+        ]);
+
+        return $this->responseSuccess('Change email successfully', $user);
     }
 
     public function changedPassword(ChangePasswordRequest $request)
