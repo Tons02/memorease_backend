@@ -58,10 +58,7 @@ class LotController extends Controller
             "status" => $request->status,
             "reserved_until" => $request->reserved_until,
             "price" => $request->price,
-            "promo_price" => $request->promo_price,
-            "downpayment_price" => $request->downpayment_price,
-            "promo_until" => $request->promo_until,
-            "is_featured" => $request->is_featured,
+            "is_land_mark" => $request->is_land_mark,
         ]);
 
         return $this->responseCreated('Lot Successfully Created', $create_lot);
@@ -117,10 +114,8 @@ class LotController extends Controller
         $lot->status = $request->status;
         $lot->reserved_until = $request->reserved_until;
         $lot->price = $request->price;
-        $lot->promo_price = $request->promo_price;
         $lot->downpayment_price = $request->downpayment_price;
-        $lot->promo_until = $request->promo_until;
-        $lot->is_featured = $request->is_featured;
+        $lot->is_land_mark = $request->is_land_mark;
 
         if (!$lot->isDirty()) {
             return $this->responseSuccess('No Changes', $lot);

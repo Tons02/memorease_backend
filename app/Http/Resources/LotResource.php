@@ -38,7 +38,8 @@ class LotResource extends JsonResource
             'downpayment_price' => $this->downpayment_price,
             'promo_price' => $this->promo_price,
             'promo_until' => $this->promo_until,
-            'is_featured' => $this->death_date,
+            'death_date' => $this->death_date,
+            'is_land_mark' => $this->is_land_mark,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

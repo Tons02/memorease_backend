@@ -37,32 +37,25 @@ class LotRequest extends FormRequest
                 "required",
             ],
             "status" => [
-                "in:available,pending,reserved,sold"
+                "in:available,pending,reserved,sold,land_mark"
             ],
             "reserved_until" => [
                 "nullable",
             ],
             'price' => [
-                'required',
-                'numeric',
-                'regex:/^\d{1,10}(\.\d{1,2})?$/',
+                'required_if:is_land_mark,0',
+                // 'numeric',
+                'nullable',
+                // 'regex:/^\d{1,10}(\.\d{1,2})?$/',
             ],
             'downpayment_price' => [
-                'required',
+                'required_if:is_land_mark,0',
                 'numeric',
+                'nullable',
                 'regex:/^\d{1,10}(\.\d{1,2})?$/',
                 'lte:price',
             ],
-            "promo_price" => [
-                "nullable",
-            ],
-            "promo_until" => [
-                "nullable",
-            ],
-            "is_featured" => [
-                "nullable",
-                "required",
-            ],
+            'is_land_mark' => ['required', 'in:0,1'],
         ];
     }
 }

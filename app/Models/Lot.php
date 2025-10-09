@@ -28,6 +28,7 @@ class Lot extends Model
         'downpayment_price',
         'promo_until',
         'is_featured',
+        'is_land_mark',
     ];
 
     protected $hidden = [
@@ -38,7 +39,8 @@ class Lot extends Model
 
     protected $casts = [
         'coordinates' => 'json',
-        'is_featured' => 'boolean'
+        'is_featured' => 'boolean',
+        // 'is_land_mark' => 'boolean'
     ];
 
     public function deceased()
