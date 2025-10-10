@@ -40,9 +40,13 @@ class DeceasedRequest extends FormRequest
             ],
             "birthday" => [
                 "required",
+                "date",
+                "before:death_date",
             ],
             "death_date" => [
                 "required",
+                "date",
+                "after:birthday",
             ],
             "is_private" => [
                 "required",
