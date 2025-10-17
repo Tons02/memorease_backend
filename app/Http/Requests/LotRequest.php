@@ -33,6 +33,11 @@ class LotRequest extends FormRequest
                     ->ignore($this->route('id'))
                     ->whereNull('deleted_at'),
             ],
+            "lot_image" => [
+                "nullable",
+                "image",
+                "mimes:jpeg,png,jpg,gif,svg",
+            ],
             "coordinates" => [
                 "required",
             ],
