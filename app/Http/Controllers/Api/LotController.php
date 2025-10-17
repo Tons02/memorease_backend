@@ -56,6 +56,7 @@ class LotController extends Controller
                 ? json_decode($request->coordinates, true)
                 : $request->coordinates,
             "status" => $request->status,
+            "downpayment_price"  => $request->downpayment_price,
             "reserved_until" => $request->reserved_until,
             "price" => $request->price,
             "is_land_mark" => $request->is_land_mark,
