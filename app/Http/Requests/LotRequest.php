@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use DB;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -29,9 +30,17 @@ class LotRequest extends FormRequest
             "lot_number" => [
                 "required",
                 "string",
-                // Rule::unique('lots', 'lot_number')
-                //     ->ignore($this->route('id'))
-                //     ->whereNull('deleted_at'),
+                function ($attribute, $value, $fail) {
+                    $exists = DB::table('lots')
+                        ->where('lot_number', $value)
+                        ->whereNull('deleted_at')
+                        ->where('id', '!=', $this->route('id'))
+                        ->exists();
+                    
+                    if ($exists) {
+                        $fail('Lot number already exists.');
+                    }
+                },
             ],
             "lot_image" => [
                 "nullable",
