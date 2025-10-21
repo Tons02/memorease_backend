@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LotRequest;
 use App\Http\Resources\LotResource;
 use App\Models\Lot;
+use App\Models\Reservation;
 use Essa\APIToolKit\Api\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -73,6 +74,18 @@ class LotController extends Controller
         if (!$lot) {
             return $this->responseUnprocessable('', 'Invalid ID provided for updating. Please check the ID and try again.');
         }
+
+        // Check if the lot is already reserved and not available for editing
+        $already_reserved = Reservation::where('lot_id', $id)
+            ->whereIn('status', ['pending', 'approved', 'paid']) 
+            ->exists();
+
+        if ($already_reserved) {
+            return $this->responseUnprocessable('This lot is already reserved and cannot be edited.', '');
+        }
+
+        
+
 
         // Handle lot_image replacement
         if ($request->hasFile('lot_image')) {

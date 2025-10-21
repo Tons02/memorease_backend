@@ -189,6 +189,10 @@ class ReservationController extends Controller
     {
         $reservation = Reservation::find($id);
 
+          $request->validate([
+            'remarks' => 'required|string',
+        ]);
+
         if (!$reservation) {
             return $this->responseUnprocessable('Invalid ID provided for updating. Please check the ID and try again.', '');
         }
@@ -205,6 +209,7 @@ class ReservationController extends Controller
         $lot = Lot::findOrFail($reservation->lot_id);
 
         $reservation->status = 'canceled';
+        $reservation->remarks = $request->remarks;
 
         $lot->status = 'available';
 
