@@ -84,7 +84,7 @@ class LotController extends Controller
             return $this->responseUnprocessable('This lot is already reserved and cannot be edited.', '');
         }
 
-        
+
 
 
         // Handle lot_image replacement
@@ -148,6 +148,15 @@ class LotController extends Controller
 
         if (!$lot) {
             return $this->responseUnprocessable('', 'Invalid id please check the id and try again.');
+        }
+
+          // Check if the lot is already reserved and not available for editing
+        $already_reserved = Reservation::where('lot_id', $id)
+            ->whereIn('status', ['pending', 'approved', 'paid']) 
+            ->exists();
+
+        if ($already_reserved) {
+            return $this->responseUnprocessable('This lot is already reserved and cannot be edited.', '');
         }
 
         if ($lot->deleted_at) {
