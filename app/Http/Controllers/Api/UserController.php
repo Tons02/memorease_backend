@@ -108,4 +108,32 @@ class UserController extends Controller
             return $this->responseSuccess('user successfully archive', $user);
         }
     }
+
+    public function destroy(Request $request, $id)
+    {
+        // Prevent deleting own account
+        if ($id == auth('sanctum')->user()->id) {
+            return $this->responseUnprocessable('', 'Unable to delete. You cannot delete your own account.');
+        }
+
+        // Find user including soft-deleted ones
+        $user = User::withTrashed()->find($id);
+
+        // If user not found
+        if (!$user) {
+            return $this->responseUnprocessable('', 'Invalid ID. Please check the ID and try again.');
+        }
+
+        // If user is already soft deleted, perform force delete
+        if ($user->trashed()) {
+            $user->forceDelete();
+            return $this->responseSuccess('User permanently deleted successfully.', '');
+        }
+
+        // Otherwise soft delete the user
+        $user->delete();
+
+        return $this->responseSuccess('User archived successfully.', '');
+    }
+
 }
