@@ -47,7 +47,7 @@ class VerifyEmailCustom extends Notification
         );
 
         // Replace backend URL with frontend
-        $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
+        $frontendUrl = env('FRONTEND_URL', 'https://memorease-pmpdasma.com');
         $customFrontendUrl = str_replace(
             url('/api/email/verify'),
             $frontendUrl . '/verify',

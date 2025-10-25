@@ -26,7 +26,7 @@ class LotResource extends JsonResource
                 ? asset('storage/' . $this->third_lot_image)
                 : null,
             'fourth_lot_image' => $this->fourth_lot_image
-                ? asset('storage/' . $this->fourth_lot_image)
+                ? asset(path: 'storage/' . $this->fourth_lot_image)
                 : null,
             'lot_number' => $this->lot_number,
             'description' => $this->description,

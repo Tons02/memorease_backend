@@ -26,7 +26,7 @@ class UserController extends Controller
             ->orderBy('created_at', 'desc')
             ->useFilters()
             ->dynamicPaginate();
-
+s
         return $this->responseSuccess('User display successfully', $users);
     }
 
