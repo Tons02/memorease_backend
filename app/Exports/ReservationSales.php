@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\Reservation;
+use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -65,8 +66,18 @@ class ReservationSales implements FromCollection, WithHeadings, WithMapping, Wit
                 ? $reservation->customer->fname . ' ' . ($reservation->customer->mi ? $reservation->customer->mi . '. ' : '') . $reservation->customer->lname
                 : '-',
             $reservation->total_downpayment_price,
-            $reservation->reserved_at ? \Carbon\Carbon::parse($reservation->reserved_at)->format('Y-m-d h:i A') : '-', // Reserved Date with time
-            $reservation->approved_date ? \Carbon\Carbon::parse($reservation->approved_date)->format('Y-m-d h:i A') : '-', // Approved Date with time
+            $reservation->reserved_at
+            ? Carbon::parse($reservation->reserved_at)
+                ->setTimezone('Asia/Manila')
+                ->format('Y-m-d h:i A')
+            : '-',
+        // Reserved Date with time
+                    $reservation->approved_date
+            ? Carbon::parse($reservation->approved_date)
+                ->setTimezone('Asia/Manila')
+                ->format('Y-m-d h:i A')
+            : '-',
+        // Approved Date with time
             isset($reservation->approved)
                 ? $reservation->approved->fname . ' ' . ($reservation->approved->mi ? $reservation->approved->mi . '. ' : '') . $reservation->approved->lname
                 : '-',
