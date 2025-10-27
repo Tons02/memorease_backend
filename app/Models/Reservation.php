@@ -46,4 +46,9 @@ class Reservation extends Model
     {
         return $this->belongsTo(User::class, 'approved_id')->withTrashed();
     }
+
+    protected $casts = [
+    'reserved_at' => 'datetime',
+    ];
+
 }
