@@ -144,7 +144,7 @@ class ChatController extends Controller
             $message_for_new_conversation = Message::create([
                 'conversation_id' => $request->conversation_id,
                 'sender_id' => $receiverId,
-                'body' => "Your Message Has been recieved, We will get back to you shortly.",
+                'body' => "Your Message Has been received, We will get back to you shortly.",
                 'created_at' => Carbon::now()->addSeconds(1),
             ]);
 
