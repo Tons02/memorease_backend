@@ -101,7 +101,7 @@ class ChatController extends Controller
                 $path = $file->store('messages', 'public'); // store under storage/app/public/messages
                 $attachments[] = [
                     'type' => str_starts_with($file->getMimeType(), 'video') ? 'video' : 'image',
-                    'url' => asset('storage/' . $path)
+                    'url' => asset('videos/' . $path)
                 ];
             }
         }

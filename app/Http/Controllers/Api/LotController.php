@@ -35,6 +35,76 @@ class LotController extends Controller
         return $this->responseSuccess('Lot display successfully', $Lot);
     }
 
+    public function streamVideo($folder, $filename)
+    {
+        // Validate folder to prevent directory traversal
+        $allowedFolders = ['lot', 'cemeteries', 'messages'];
+
+        if (!in_array($folder, $allowedFolders)) {
+            abort(403, 'Access denied');
+        }
+
+        $path = storage_path("app/public/{$folder}/" . $filename);
+
+        if (!file_exists($path)) {
+            abort(404, 'Video not found');
+        }
+
+        $fileSize = filesize($path);
+        $mimeType = mime_content_type($path);
+        $range = request()->header('Range');
+
+        if (!$range) {
+            return response()->file($path, [
+                'Content-Type' => $mimeType,
+                'Accept-Ranges' => 'bytes',
+                'Content-Length' => $fileSize,
+            ]);
+        }
+
+        list($param, $rangeValue) = explode('=', $range);
+
+        if (strtolower(trim($param)) != 'bytes') {
+            return response('Invalid range parameter', 400);
+        }
+
+        $rangeParts = explode('-', $rangeValue);
+        $start = intval($rangeParts[0]);
+        $end = isset($rangeParts[1]) && $rangeParts[1] !== '' ? intval($rangeParts[1]) : $fileSize - 1;
+
+        if ($start > $end || $start >= $fileSize || $end >= $fileSize) {
+            return response('', 416)
+                ->header('Content-Range', "bytes */$fileSize");
+        }
+
+        $length = $end - $start + 1;
+
+        $stream = new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($path, $start, $length) {
+            $fp = fopen($path, 'rb');
+            fseek($fp, $start);
+
+            $buffer = 8192;
+            $bytesRead = 0;
+
+            while (!feof($fp) && $bytesRead < $length && connection_status() == 0) {
+                $bytesToRead = min($buffer, $length - $bytesRead);
+                echo fread($fp, $bytesToRead);
+                $bytesRead += $bytesToRead;
+                flush();
+            }
+
+            fclose($fp);
+        });
+
+        $stream->setStatusCode(206);
+        $stream->headers->set('Content-Type', $mimeType);
+        $stream->headers->set('Content-Length', $length);
+        $stream->headers->set('Content-Range', "bytes $start-$end/$fileSize");
+        $stream->headers->set('Accept-Ranges', 'bytes');
+
+        return $stream;
+    }
+
     public function store(LotRequest $request)
     {
         // Handle lot_image (first image)
@@ -77,7 +147,7 @@ class LotController extends Controller
 
         // Check if the lot is already reserved and not available for editing
         $already_reserved = Reservation::where('lot_id', $id)
-            ->whereIn('status', ['pending', 'approved', 'paid']) 
+            ->whereIn('status', ['pending', 'approved', 'paid'])
             ->exists();
 
         if ($already_reserved) {
@@ -150,9 +220,9 @@ class LotController extends Controller
             return $this->responseUnprocessable('', 'Invalid id please check the id and try again.');
         }
 
-          // Check if the lot is already reserved and not available for editing
+        // Check if the lot is already reserved and not available for editing
         $already_reserved = Reservation::where('lot_id', $id)
-            ->whereIn('status', ['pending', 'approved', 'paid']) 
+            ->whereIn('status', ['pending', 'approved', 'paid'])
             ->exists();
 
         if ($already_reserved) {
