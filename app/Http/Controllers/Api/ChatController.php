@@ -132,13 +132,14 @@ class ChatController extends Controller
         // Get the receiver's user ID
         $conversation = $message->conversation()->with('users')->first();
 
-        $message_count = $message_count = $conversation->messages()->count();
+        $message_count = $conversation->messages()->count();
 
         if ($receiver) {
             broadcast(new MessageSent($message, $receiver->id));
         }
 
-        if ($message_count == 1) {
+        // Only send auto-reply if sender is NOT an admin and it's the first message
+        if ($message_count == 1 && Auth::user()->role_type !== 'admin') {
 
             $message_for_new_conversation = Message::create([
                 'conversation_id' => $request->conversation_id,
