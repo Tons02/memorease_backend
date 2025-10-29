@@ -196,7 +196,9 @@ class LotController extends Controller
             ? json_decode($request->coordinates, true)
             : $request->coordinates;
         $lot->status = $request->status;
-        $lot->reserved_until = $request->reserved_until;
+        $lot->reserved_until = isset($request->reserved_until) && $request->reserved_until !== ''
+            ? $request->reserved_until
+            : null;
         $lot->price = $request->price;
         $lot->downpayment_price = $request->downpayment_price;
         $lot->is_land_mark = $request->is_land_mark;

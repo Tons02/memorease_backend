@@ -27,9 +27,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'stream.video' => HandleVideoRangeRequests::class,
         ]);
     })->withMiddleware(function (Illuminate\Foundation\Configuration\Middleware $middleware) {
-        $middleware->use([
-            TrustProxies::class,
-        ]);
+        if (app()->environment('production')) {
+            $middleware->use([
+                TrustProxies::class,
+            ]);
+        }
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
