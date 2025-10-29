@@ -30,7 +30,7 @@ class ReservationFilter extends QueryFilters
 
     public function status($status)
     {
-        if (!is_null($status)) {
+        if ($status !== null && $status !== '') {
             $this->builder->where('status', $status);
         }
 
