@@ -9,8 +9,13 @@ class ReservationFilter extends QueryFilters
     protected array $allowedFilters = [];
 
     protected array $columnSearch = [
-        'price',
-        'remarks'
+        'total_downpayment_price',
+        'status'
+    ];
+
+    protected array $relationSearch = [
+        'customer' => ['fname', 'lname'],
+        'lot' => ['lot_number']
     ];
 
     public function customer_id($customer_id)
@@ -25,7 +30,7 @@ class ReservationFilter extends QueryFilters
 
     public function status($status)
     {
-        if (!is_null($status)) {
+        if ($status !== null && $status !== '') {
             $this->builder->where('status', $status);
         }
 
