@@ -69,6 +69,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::patch("reservation-reject/{id}", [ReservationController::class, 'reject']);
     Route::match(['POST', 'PATCH'], 'deceased/{id}', [DeceasedController::class, 'update']);
 
+    // audit Trail
+    Route::get("audit_trail", [ReservationController::class, 'get_audit_trail']);
+    Route::patch("transfer_lot/{id}", [ReservationController::class, 'transfer_lot']);
+
     // Deceased Controller
     Route::put('deceased-archived/{id}', [DeceasedController::class, 'archived']);
     Route::post("deceased", [DeceasedController::class, 'store']);

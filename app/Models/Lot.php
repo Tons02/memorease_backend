@@ -52,4 +52,9 @@ class Lot extends Model
     {
         return $this->hasMany(Reservation::class, 'lot_id');
     }
+    
+    public function audit_trail()
+    {
+        return $this->hasOne(AuditTrails::class, 'lot_id');
+    }
 }

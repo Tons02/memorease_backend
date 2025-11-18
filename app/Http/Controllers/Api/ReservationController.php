@@ -10,7 +10,9 @@ use App\Http\Requests\CancelReservationRequest;
 use App\Http\Requests\ReservationRequest;
 use App\Http\Requests\WalkInRequest;
 use App\Http\Resources\ReservationResource;
+use App\Mail\ReservationSuccessMail;
 use App\Mail\WalkInReservationMail;
+use App\Models\AuditTrails;
 use App\Models\Lot;
 use App\Models\Reservation;
 use App\Models\User;
@@ -52,7 +54,6 @@ class ReservationController extends Controller
 
     public function store(ReservationRequest $request)
     {
-
         $request->file('proof_of_payment');
         $proof_of_payment = $request->file('proof_of_payment')?->store('proof_of_payment', 'public');
 
@@ -84,6 +85,10 @@ class ReservationController extends Controller
 
         // Fire Event
         event(new LotReserved($lot));
+
+        // Send Email
+        Mail::to(auth()->user()->email)->send(new ReservationSuccessMail($create_reservation));
+      
 
         return $this->responseCreated('Reservation Successfully Created', $create_reservation);
     }
@@ -177,6 +182,11 @@ class ReservationController extends Controller
         $reservation->save();
 
         $lot->save();
+
+        $create_audit_trail = AuditTrails::create([
+            "lot_id" => $lot->id,
+            "current_owner_id" => $reservation->user_id,
+        ]);
 
 
         event(new LotReserved($lot));
@@ -313,5 +323,68 @@ class ReservationController extends Controller
             new ReservationSales($status, $start_date, $end_date),
             'Reservation Sales.xlsx'
         );
+    }
+
+    public function get_audit_trail(Request $request) {
+        $status = $request->query('status');
+
+        $AuditTrails = AuditTrails::with(['lot', 'current_owner'])->when($status === 'inactive', function ($query) {
+            $query->onlyTrashed();
+        })
+            ->orderBy('created_at', 'desc')
+            ->useFilters()
+            ->dynamicPaginate();
+            
+        return $this->responseSuccess('Audit Trail display successfully', $AuditTrails);
+    }
+    
+    public function transfer_lot(Request $request, $id)
+    {
+        $audit = AuditTrails::with(['current_owner', 'lot'])->findOrFail($id);
+
+        // Validate that the authenticated user is the current owner
+        if (auth()->user()->id !== $audit->current_owner_id) {
+            return $this->responseBadRequest('You are not authorized to transfer this lot. Only the current owner can transfer ownership.');
+        }
+
+        $validated = $request->validate([
+            'new_owner_id' => [
+                'required',
+                'exists:users,id',
+                function ($attribute, $value, $fail) use ($audit) {
+                    if ($value == $audit->current_owner_id) {
+                        $fail('Cannot transfer lot to the same owner.');
+                    }
+                },
+            ],
+        ]); 
+
+        // Get the current owner (authenticated user)
+        $currentUser = auth()->user();
+
+        $currentOwnerName = trim(
+            $currentUser->fname . ' ' .
+            ($currentUser->mi ? $currentUser->mi . ' ' : '') .
+            $currentUser->lname .
+            ($currentUser->suffix ? ' ' . $currentUser->suffix : '')
+        );
+
+        // Get existing previous owners array
+        $existingPreviousOwners = $audit->previous_owner ?? [];
+        
+        // If it's a string (old data), convert to array
+        if (is_string($existingPreviousOwners)) {
+            $existingPreviousOwners = [$existingPreviousOwners];
+        }
+        
+        // Add the current owner to the previous owners array
+        $existingPreviousOwners[] = $currentOwnerName;
+
+        // Assign the array directly (Laravel will handle JSON encoding)
+        $audit->previous_owner = $existingPreviousOwners;
+        $audit->current_owner_id = $validated['new_owner_id'];   
+        $audit->save();
+
+        return $this->responseSuccess('Transfer Lot successfully', $audit);
     }
 }

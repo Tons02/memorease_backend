@@ -27,9 +27,9 @@ class DeceasedController extends Controller
                 $query->onlyTrashed();
             })
             ->when($is_customer == 'true', function ($query) use ($userId) {
-                $query->whereHas('lot.reservations', function ($query) use ($userId) {
-                    $query->where('user_id', $userId)
-                        ->where('status', 'approved');
+                // Filter by current_owner_id in audit_trails
+                $query->whereHas('lot.audit_trail', function ($query) use ($userId) {
+                    $query->where('current_owner_id', $userId);
                 });
             })
             ->orderBy('created_at', 'desc')
