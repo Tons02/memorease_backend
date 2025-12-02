@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TermsAndAgreementRequest;
+use App\Models\ActivityLog;
 use App\Models\TermsAndAgreement;
 use Essa\APIToolKit\Api\ApiResponse;
 use Illuminate\Http\Request;
@@ -40,6 +41,12 @@ class TermsAndAgreementController extends Controller
             "terms" => $request["terms"],
         ]);
 
+        
+        ActivityLog::create(attributes: [
+            'action' => 'Create Terms and Agreement',
+            'user_id' => auth()->user()->id,
+        ]);
+
         return $this->responseCreated('Terms and agreement Successfully Created', $create_terms);
     }
 
@@ -57,7 +64,13 @@ class TermsAndAgreementController extends Controller
             return $this->responseSuccess('No Changes', $terms);
         }
 
-        $terms->save();
+        $terms->save();   
+        
+        ActivityLog::create(attributes: [
+            'action' => 'Update Terms and Agreement',
+            'user_id' => auth()->user()->id,
+        ]);
+
 
         return $this->responseSuccess('Terms and agreement successfully updated', $terms);
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\ActivityLog;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
@@ -52,6 +53,19 @@ class UserController extends Controller
 
         $create_user->notify(new SendDefaultCredentialsNotification($password));
 
+        $fullName = trim(
+            $request->fname . ' ' .
+            ($request->mname ? $request->mname . ' ' : '') .
+            $request->lname .
+            ($request->suffix ? ' ' . $request->suffix : '')
+        );
+
+        ActivityLog::create([
+            'action' => 'Add New User: ' . $fullName,
+            'user_id' => auth()->user()->id,
+        ]);
+
+
         return $this->responseCreated('User Successfully Created', $create_user);
     }
 
@@ -80,6 +94,19 @@ class UserController extends Controller
         }
 
         $userID->save();
+
+         $fullName = trim(
+            $request->fname . ' ' .
+            ($request->mname ? $request->mname . ' ' : '') .
+            $request->lname .
+            ($request->suffix ? ' ' . $request->suffix : '')
+        );
+
+        ActivityLog::create([
+            'action' => 'Update User: ' . $fullName,
+            'user_id' => auth()->user()->id,
+        ]);
+
 
         return $this->responseSuccess('Users successfully updated', $userID);
     }

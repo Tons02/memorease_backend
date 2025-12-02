@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DeceasedRequest;
 use App\Http\Resources\DeceasedResource;
+use App\Models\ActivityLog;
 use App\Models\Deceased;
 use Essa\APIToolKit\Api\ApiResponse;
 use Illuminate\Http\Request;
@@ -69,6 +70,18 @@ class DeceasedController extends Controller
             'is_private' => $request->is_private,
         ]);
 
+        $fullName = trim(
+            $request->fname . ' ' .
+            ($request->mname ? $request->mname . ' ' : '') .
+            $request->lname .
+            ($request->suffix ? ' ' . $request->suffix : '')
+        );
+
+        ActivityLog::create([
+            'action' => 'Add Deceased: ' . $fullName,
+            'user_id' => auth()->user()->id,
+        ]);
+
         return $this->responseCreated('Deceased Successfully Created', $create_deceased);
     }
 
@@ -109,6 +122,19 @@ class DeceasedController extends Controller
         $update_deceased->is_private = $request->is_private;
 
         $update_deceased->save();
+
+        $fullName = trim(
+            $update_deceased->fname . ' ' .
+            ($update_deceased->mname ? $update_deceased->mname . ' ' : '') .
+            $update_deceased->lname .
+            ($update_deceased->suffix ? ' ' . $update_deceased->suffix : '')
+        );
+
+        ActivityLog::create([
+            'action' => 'Update Deceased: ' . $fullName,
+            'user_id' => auth()->user()->id,
+        ]);
+
 
         return $this->responseCreated('Deceased record updated successfully.', $update_deceased);
     }

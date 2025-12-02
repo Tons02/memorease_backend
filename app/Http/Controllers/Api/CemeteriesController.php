@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CemeteriesRequest;
 use App\Http\Resources\CemeteryResource;
+use App\Models\ActivityLog;
 use App\Models\Cemeteries;
 use Essa\APIToolKit\Api\ApiResponse;
 use Illuminate\Http\Request;
@@ -76,6 +77,13 @@ class CemeteriesController extends Controller
         }
 
         $cemetery->save();
+
+
+        ActivityLog::create([
+            'action' => 'Update Cemetery Information',
+            'user_id' => auth()->user()->id,
+        ]);
+
 
         return $this->responseSuccess('Cemetery successfully updated', $cemetery);
     }

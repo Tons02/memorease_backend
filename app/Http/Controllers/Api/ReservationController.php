@@ -12,6 +12,7 @@ use App\Http\Requests\WalkInRequest;
 use App\Http\Resources\ReservationResource;
 use App\Mail\ReservationSuccessMail;
 use App\Mail\WalkInReservationMail;
+use App\Models\ActivityLog;
 use App\Models\AuditTrails;
 use App\Models\Lot;
 use App\Models\Reservation;
@@ -69,6 +70,8 @@ class ReservationController extends Controller
             return $this->responseUnprocessable('Please Finish your pending reservation first.', '');
         }
 
+         $lot_details = Lot::where('id', $lot_id)->first();
+
         // Create Reservation
         $create_reservation = Reservation::create([
             'lot_id' => $lot_id,
@@ -82,6 +85,11 @@ class ReservationController extends Controller
 
         $lot = Lot::findOrFail($request->lot_id);
         $lot->update(['status' => 'reserved']);
+
+        ActivityLog::create([
+            'action' => 'Reserve Lot ' . $lot_details->lot_number,
+            'user_id' => auth()->user()->id,
+        ]);
 
         // Fire Event
         event(new LotReserved($lot));
@@ -147,6 +155,23 @@ class ReservationController extends Controller
             ));
         }
 
+        $create_audit_trail = AuditTrails::create([
+            "lot_id" => $lot->id,
+            "current_owner_id" => $create_user->id,
+        ]);
+
+        // to the customer
+        ActivityLog::create([
+            'action' => 'Walkin Reservation Reserve Lot ID ' . $lot->id,
+            'user_id' => $create_user->id,
+        ]);
+
+        // log of who created the transanction
+        ActivityLog::create([
+            'action' => 'Create Walkin Reservation for Lot ID ' . $lot->id,
+            'user_id' => auth()->user()->id,
+        ]);
+
         return $this->responseCreated('Reservation Successfully Created', $create_reservation);
     }
 
@@ -188,6 +213,13 @@ class ReservationController extends Controller
             "current_owner_id" => $reservation->user_id,
         ]);
 
+        
+        // log of who approve the transanction
+        ActivityLog::create([
+            'action' => 'Approved Reservation ID:  ' . $reservation->id,
+            'user_id' => auth()->user()->id,
+        ]);
+
 
         event(new LotReserved($lot));
 
@@ -227,6 +259,12 @@ class ReservationController extends Controller
 
         $lot->save();
 
+        // log of who approve the transanction
+        ActivityLog::create([
+            'action' => 'Cancel Reservation ID ' . $reservation->id,
+            'user_id' => auth()->user()->id,
+        ]);
+
 
         event(new LotReserved($lot));
 
@@ -265,6 +303,12 @@ class ReservationController extends Controller
         $reservation->save();
 
         $lot->save();
+
+        // log of who approve the transanction
+        ActivityLog::create([
+            'action' => 'Reject Reservation ID ' . $reservation->id,
+            'user_id' => auth()->user()->id,
+        ]);
 
 
         event(new LotReserved($lot));
@@ -357,7 +401,7 @@ class ReservationController extends Controller
                     }
                 },
             ],
-        ]); 
+        ]);
 
         // Get the current owner (authenticated user)
         $currentUser = auth()->user();
@@ -369,22 +413,55 @@ class ReservationController extends Controller
             ($currentUser->suffix ? ' ' . $currentUser->suffix : '')
         );
 
+        // ---- GET NEW OWNER NAME ----
+        $newOwner = User::find($validated['new_owner_id']);
+        $newOwnerName = trim(
+            $newOwner->fname . ' ' .
+            ($newOwner->mi ? $newOwner->mi . ' ' : '') .
+            $newOwner->lname .
+            ($newOwner->suffix ? ' ' . $newOwner->suffix : '')
+        );
+        // ----------------------------
+
         // Get existing previous owners array
         $existingPreviousOwners = $audit->previous_owner ?? [];
-        
-        // If it's a string (old data), convert to array
+
+        // Convert to array if stored as string
         if (is_string($existingPreviousOwners)) {
             $existingPreviousOwners = [$existingPreviousOwners];
         }
-        
+
         // Add the current owner to the previous owners array
         $existingPreviousOwners[] = $currentOwnerName;
 
-        // Assign the array directly (Laravel will handle JSON encoding)
+        // Save
         $audit->previous_owner = $existingPreviousOwners;
-        $audit->current_owner_id = $validated['new_owner_id'];   
+        $audit->current_owner_id = $validated['new_owner_id'];
         $audit->save();
+
+        // ---- CREATE ACTIVITY LOG WITH FULL NAME ----
+        ActivityLog::create([
+            'action'  => "Transferred lot to {$newOwnerName}",
+            'user_id' => auth()->user()->id,
+        ]);
+        // --------------------------------------------
 
         return $this->responseSuccess('Transfer Lot successfully', $audit);
     }
+
+
+
+    public function activity_log(Request $request){
+        $status = $request->query('status');
+
+        $ActivityLog = ActivityLog::with('user')->when($status === 'inactive', function ($query) {
+            $query->onlyTrashed();
+        })
+            ->orderBy('created_at', 'desc')
+            ->useFilters()
+            ->dynamicPaginate();
+            
+        return $this->responseSuccess('Activity Log display successfully', $ActivityLog);
+    }
+
 }

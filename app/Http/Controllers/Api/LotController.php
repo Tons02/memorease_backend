@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LotRequest;
 use App\Http\Resources\LotResource;
+use App\Models\ActivityLog;
 use App\Models\Lot;
 use App\Models\Reservation;
 use Essa\APIToolKit\Api\ApiResponse;
@@ -133,6 +134,11 @@ class LotController extends Controller
             "is_land_mark" => $request->is_land_mark,
         ]);
 
+        ActivityLog::create([
+            'action' => 'Create Lot ' . $create_lot->lot_number,
+            'user_id' => auth()->user()->id,
+        ]);
+
         return $this->responseCreated('Lot Successfully Created', $create_lot);
     }
 
@@ -153,9 +159,6 @@ class LotController extends Controller
         if ($already_reserved) {
             return $this->responseUnprocessable('This lot is already reserved and cannot be edited.', '');
         }
-
-
-
 
         // Handle lot_image replacement
         if ($request->hasFile('lot_image')) {
@@ -207,6 +210,11 @@ class LotController extends Controller
 
         $lot->save();
 
+        
+        ActivityLog::create(attributes: [
+            'action' => 'Update Lot ' . $lot->lot_number,
+            'user_id' => auth()->user()->id,
+        ]);
         return $this->responseSuccess('Lot successfully updated', $lot);
     }
 
@@ -239,6 +247,11 @@ class LotController extends Controller
         if (!$lot->deleted_at) {
 
             $lot->delete();
+                
+            ActivityLog::create(attributes: [
+                'action' => 'Delete Lot ' . $lot->number,
+                'user_id' => auth()->user()->id,
+            ]);
 
             return $this->responseSuccess('lot successfully deleted', $lot);
         }

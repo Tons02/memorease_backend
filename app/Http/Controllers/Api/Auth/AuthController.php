@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ChangeEmailRequest;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\RegistrationRequest;
+use App\Models\ActivityLog;
 use App\Models\Role;
 use App\Models\User;
 use Essa\APIToolKit\Api\ApiResponse;
@@ -143,6 +144,11 @@ class AuthController extends Controller
 
         $user->update([
             'password' => Hash::make($request->new_password),
+        ]);
+
+        ActivityLog::create([
+            'action' => 'Change Password',
+            'user_id' => auth()->user()->id,
         ]);
 
         return $this->responseSuccess('Password change successfully');

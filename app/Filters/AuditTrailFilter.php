@@ -8,7 +8,9 @@ class AuditTrailFilter extends QueryFilters
 {
     protected array $allowedFilters = [];
 
-    protected array $columnSearch = [];
+    protected array $relationSearch = [
+        'lot' => ['lot_number']
+    ];
 
     
     public function customer_id($customer_id)

@@ -72,6 +72,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // audit Trail
     Route::get("audit_trail", [ReservationController::class, 'get_audit_trail']);
     Route::patch("transfer_lot/{id}", [ReservationController::class, 'transfer_lot']);
+    Route::get("activity_logs", [ReservationController::class, 'activity_log']);
 
     // Deceased Controller
     Route::put('deceased-archived/{id}', [DeceasedController::class, 'archived']);
