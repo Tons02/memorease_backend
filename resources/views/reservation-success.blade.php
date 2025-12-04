@@ -108,9 +108,8 @@
                         <li>This confirmation email (printed or on your phone)</li>
                     </ul>
                 </li>
-                <li><strong>Meet with Our Admin Team:</strong> Our staff will verify your payment and reservation details.</li>
-                <li><strong>Payment Confirmation:</strong> Once verified, your reservation status will be updated and you'll receive a confirmation.</li>
-                <li><strong>Finalize Documentation:</strong> Complete any additional paperwork required for your lot purchase.</li>
+                <li><strong>Contract Signing</strong> </li>
+                <li><strong>Official Receipt</strong> </li>
             </ol>
         </div>
 
